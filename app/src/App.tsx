@@ -10,6 +10,7 @@ import Backtest from './modules/backtest/Backtest';
 import Paper from './modules/paper/Paper';
 import Predictions from './modules/predictions/Predictions';
 import AiAdvice from './modules/aiadvice/AiAdvice';
+import TradePlan from './modules/tradeplan/TradePlan';
 import Settings from './modules/settings/Settings';
 
 const NAV = [
@@ -19,6 +20,7 @@ const NAV = [
   { to: '/watchlist', key: 'nav.watchlist' },
   { to: '/signals', key: 'nav.signals' },
   { to: '/aiadvice', key: 'nav.aiadvice' },
+  { to: '/tradeplan', key: 'nav.tradeplan' },
   { to: '/backtest', key: 'nav.backtest' },
   { to: '/paper', key: 'nav.paper' },
   { to: '/predictions', key: 'nav.predictions' },
@@ -60,6 +62,7 @@ export default function App() {
           <Route path="/watchlist" element={<Watchlist />} />
           <Route path="/signals" element={<Signals />} />
           <Route path="/aiadvice" element={<AiAdvice />} />
+          <Route path="/tradeplan" element={<TradePlan />} />
           <Route path="/backtest" element={<Backtest />} />
           <Route path="/paper" element={<Paper />} />
           <Route path="/predictions" element={<Predictions />} />

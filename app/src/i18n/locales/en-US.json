@@ -14,7 +14,8 @@
     "backtest": "Backtest",
     "paper": "Paper Trading",
     "predictions": "Prediction Accuracy",
-    "aiadvice": "AI Advice"
+    "aiadvice": "AI Advice",
+    "tradeplan": "Trade Plan"
   },
   "dashboard": {
     "title": "Market Dashboard",
@@ -205,5 +206,40 @@
     "cost": "Cost",
     "evidence": "Evidence chain",
     "disclaimer": "For research assistance only, based on public news/announcements and local rules. Not investment advice. Data may be delayed or unlicensed; verify original sources."
+  },
+  "tradeplan": {
+    "title": "Trade Plan & One-Week Simulation",
+    "subtitle": "AI provides entry, take-profit, stop-loss, quantity and position size; simulation starts next trading day and settles after 5 real trading days",
+    "build": "Build trade plan",
+    "start": "Start one-week sim",
+    "building": "Building…",
+    "built": "Trade plan built",
+    "started": "One-week simulation started on",
+    "startFailed": "Start failed",
+    "regime": "Market regime",
+    "upRatio": "Up ratio",
+    "sizeFactor": "Size factor",
+    "plans": "Trade plan details",
+    "noPlans": "No plan yet. Click “Build trade plan”.",
+    "code": "Stock",
+    "action": "Action",
+    "status": "Status",
+    "entry": "Entry/Exit reference",
+    "stop": "Stop",
+    "target": "Target",
+    "qty": "Qty",
+    "value": "Value",
+    "risk": "Risk %",
+    "regimeShort": "Regime",
+    "weekly": "One-week simulation",
+    "startDate": "Start date",
+    "initialCash": "Initial cash",
+    "noWeekly": "No one-week simulation started.",
+    "disclaimer": "Plans are generated from AI advice + market regime + rules. The simulation uses only future real data and never fabricates results. Not investment advice.",
+    "evaluate": "Evaluate week",
+    "evalFailed": "Evaluation failed",
+    "date": "Date",
+    "equity": "Equity",
+    "benchmark": "Benchmark (base 100)"
   }
 }

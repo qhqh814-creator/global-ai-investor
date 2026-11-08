@@ -46,6 +46,7 @@ from .rules.store import list_versions as db_rule_versions, stats as db_rule_sta
 from .securities import list_securities, stats as securities_stats, upsert_securities
 from .securities.fallback import ensure_data_source, populate_from_quotes
 from .trading_calendar import TradingCalendar
+from .trading_plan import build_trade_plans, evaluate_weekly, latest_weekly_sim, list_trade_plans, market_regime, start_weekly_sim
 
 ROOT = Path(os.environ.get("GAI_ROOT", Path(__file__).resolve().parents[2]))
 DATA_DIR = ROOT / "data"
@@ -637,9 +638,46 @@ def api_set_ai_key(payload: AiKeyIn) -> dict:
     return {"ok": True, "provider": provider}
 
 
+@app.get("/api/market/regime", dependencies=[Depends(require_token)])
+def api_market_regime() -> dict:
+    with get_db() as conn:
+        return market_regime(conn)
+
+
+@app.post("/api/trade-plans/run", dependencies=[Depends(require_token)])
+def api_trade_plans_run(model: str | None = None) -> dict:
+    with get_db() as conn:
+        return build_trade_plans(conn, model_id=model or "evidence-aggregator")
+
+
+@app.get("/api/trade-plans", dependencies=[Depends(require_token)])
+def api_trade_plans(limit: int = 100) -> dict:
+    with get_db() as conn:
+        return {"items": list_trade_plans(conn, limit=limit)}
+
+
+@app.post("/api/weekly/start", dependencies=[Depends(require_token)])
+def api_weekly_start(initial_cash: float = 100000.0) -> dict:
+    with get_db() as conn:
+        return start_weekly_sim(conn, initial_cash=initial_cash)
+
+
+@app.post("/api/weekly/evaluate", dependencies=[Depends(require_token)])
+def api_weekly_evaluate() -> dict:
+    with get_db() as conn:
+        return evaluate_weekly(conn, fetch=True)
+
+@app.get("/api/weekly/latest", dependencies=[Depends(require_token)])
+def api_weekly_latest() -> dict:
+    with get_db() as conn:
+        return latest_weekly_sim(conn) or {"sim": None}
+
+
 @app.exception_handler(Exception)
 async def unhandled(_request: Request, exc: Exception) -> JSONResponse:
     return JSONResponse(status_code=500, content={"ok": False, "error": str(exc)})
+
+
 
 
 

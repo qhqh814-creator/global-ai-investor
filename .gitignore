@@ -34,3 +34,6 @@ release-test-data/
 build-pyinstaller/
 
 release-trial/
+
+installed/
+release-installed/

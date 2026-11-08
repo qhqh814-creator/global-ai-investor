@@ -4,9 +4,12 @@ from datetime import datetime
 
 from backend.app.workers.scheduler import (
     JOB_ANNOUNCEMENTS,
+    JOB_AUTO_BUY,
     JOB_CALENDAR,
     JOB_NEWS,
+    JOB_PIPELINE,
     JOB_QUOTES,
+    JOB_RISK,
     build_scheduler,
     is_trading_session,
     run_job_now,
@@ -33,7 +36,7 @@ def test_trading_session_boundaries():
 def test_build_scheduler_registers_jobs():
     sched = build_scheduler(lambda: None)
     ids = {job.id for job in sched.get_jobs()}
-    assert ids == {JOB_QUOTES, JOB_NEWS, JOB_ANNOUNCEMENTS, JOB_CALENDAR}
+    assert ids == {JOB_QUOTES, JOB_NEWS, JOB_ANNOUNCEMENTS, JOB_CALENDAR, JOB_PIPELINE, JOB_AUTO_BUY, JOB_RISK}
 
 
 def test_run_job_now_unknown_raises():

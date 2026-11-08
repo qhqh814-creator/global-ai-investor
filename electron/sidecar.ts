@@ -1,4 +1,4 @@
-import { ChildProcess, spawn } from 'node:child_process';
+﻿import { ChildProcess, spawn } from 'node:child_process';
 import { createServer } from 'node:net';
 import { existsSync } from 'node:fs';
 import { join } from 'node:path';
@@ -61,6 +61,7 @@ export async function startSidecar(rootDir: string): Promise<SidecarInfo> {
     ...process.env,
     GAI_ROOT: rootDir,
     GAI_PORT: String(port),
+    GAI_ENABLE_SCHEDULER: process.env.GAI_ENABLE_SCHEDULER ?? "1",
     GAI_TOKEN: token,
     PYTHONUNBUFFERED: '1'
   };
@@ -103,3 +104,4 @@ export function stopSidecar(): void {
     child = null;
   }
 }
+

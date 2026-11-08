@@ -1,4 +1,4 @@
-﻿import { app, BrowserWindow, ipcMain, shell } from 'electron';
+import { app, BrowserWindow, ipcMain, shell } from 'electron';
 import { existsSync, mkdirSync } from 'node:fs';
 import { join } from 'node:path';
 import { startSidecar, stopSidecar, type SidecarInfo } from './sidecar';
@@ -43,16 +43,29 @@ ipcMain.handle('backend:info', () => sidecar);
 ipcMain.handle('app:version', () => app.getVersion());
 ipcMain.handle('app:rootDir', () => rootDir);
 
-app.whenReady().then(async () => {
-  mkdirSync(rootDir, { recursive: true });
-  sidecar = await startSidecar(rootDir);
-  console.log('[main] sidecar:', sidecar.status, sidecar.baseUrl, sidecar.error ?? '');
-  await createWindow();
-
-  app.on('activate', () => {
-    if (BrowserWindow.getAllWindows().length === 0) void createWindow();
+const gotSingleInstanceLock = app.requestSingleInstanceLock();
+if (!gotSingleInstanceLock) {
+  app.quit();
+} else {
+  app.on('second-instance', () => {
+    if (mainWindow) {
+      if (mainWindow.isMinimized()) mainWindow.restore();
+      mainWindow.show();
+      mainWindow.focus();
+    }
   });
-});
+
+  app.whenReady().then(async () => {
+    mkdirSync(rootDir, { recursive: true });
+    sidecar = await startSidecar(rootDir);
+    console.log('[main] sidecar:', sidecar.status, sidecar.baseUrl, sidecar.error ?? '');
+    await createWindow();
+
+    app.on('activate', () => {
+      if (BrowserWindow.getAllWindows().length === 0) void createWindow();
+    });
+  });
+}
 
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') app.quit();

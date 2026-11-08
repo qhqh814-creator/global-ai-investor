@@ -1,0 +1,27 @@
+# 全局忽略
+node_modules/
+.venv/
+tools/node/
+tools/node.zip
+tools/node-tmp/
+__pycache__/
+*.pyc
+.pytest_cache/
+dist/
+dist-electron/
+release/
+build/
+data/
+backups/
+*.log
+.env
+.env.*
+!/.env.example
+data/settings/secrets.dat
+*.db
+*.db-wal
+*.db-shm
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/

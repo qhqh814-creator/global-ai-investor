@@ -1,0 +1,55 @@
+# Global AI Investor V1.0（中国A股版）
+
+Windows 独立桌面应用：A股真实数据采集 + 配置化交易规则引擎 + 本地/DeepSeek AI 分析 + 驾驶舱 + 四级警报 + 回测 + 模拟交易 + 预测准确率统计。中英文双语。
+
+## 状态
+
+- 阶段：**P0 完成 → 准备进入 P1**
+- 基线文档：已完成（docs/00–09，v1.0）
+- 环境：Node v22.23.4（tools\node 便携版）、npm 10.9.9、Python 3.12 venv（50 个依赖包）
+- 已验证：`npm run build` 通过；Electron 生产包启动并加载驾驶舱（15 张卡片显示“数据不可用”）；Python sidecar `/health`、`/api/status`、`/api/dashboard` 正常，未带 Token 返回 401
+- 注意：某些终端环境会设置 `ELECTRON_RUN_AS_NODE=1`，会让 Electron 以 Node 模式启动而报 `app.isPackaged` 未定义。`scripts/dev.ps1` 与 `npm run dev:electron` 已清除该变量；直接双击安装包运行时不受影响。
+
+## 文档索引
+
+| 文档 | 说明 |
+|---|---|
+| [00-项目总控指令](docs/00-项目总控指令-v1.0.md) | 原则、范围、决策记录 |
+| [01-PRD](docs/01-PRD-A股版-v1.0.md) | 需求与验收标准 |
+| [02-技术架构](docs/02-技术架构-A股版-v1.0.md) | 进程、模块、接口、数据流 |
+| [03-数据模型](docs/03-数据模型-v1.0.md) | 表结构设计 |
+| [04-数据源清单](docs/04-数据源清单-v1.0.md) | 数据源登记、许可、降级 |
+| [05-开发阶段](docs/05-开发阶段与里程碑-v1.0.md) | P0–P6 里程碑 |
+| [06-交易规则配置规范](docs/06-交易规则配置规范-v1.0.md) | 规则库 schema 与版本 |
+| [07-数据真实性与降级规范](docs/07-数据真实性与降级规范-v1.0.md) | 溯源字段与硬性禁令 |
+| [08-项目保护与部署规范](docs/08-项目保护与部署规范-v1.0.md) | 备份、密钥、打包、卸载 |
+
+## 目录结构（规划）
+
+```
+F:\GlobalAIInvestor
+├── docs\            基线文档
+├── app\             Electron + React + TypeScript 前端
+├── electron\        Electron main / preload
+├── backend\         Python 数据/规则/AI/回测 服务（FastAPI sidecar）
+│   └── app\
+├── data\            用户数据（SQLite、缓存、日志、备份）
+├── tools\           便携运行时（Node 等，不提交 git）
+├── scripts\         构建、启动、备份脚本
+├── backups\         数据库/配置备份
+├── .venv\           Python 虚拟环境（不提交 git）
+└── .gitignore
+```
+
+## 开发环境（P0）
+
+- Node.js LTS（便携版，`tools\node\`）
+- Python 3.12 虚拟环境（`.venv\`，uv 管理）
+- Ollama（本机实验，默认 `127.0.0.1:11434`）
+- DeepSeek API（正式阶段，密钥 DPAPI 加密）
+
+## 重要约束
+
+- **无真实数据必须显示“数据不可用”**，禁止虚构、插值、旧值冒充。
+- 交易规则不得硬编码，必须按板块/版本/生效日期配置。
+- 免费行情为第三方未授权快照，UI 必须标注来源与数据时间，禁止宣称“实时”。

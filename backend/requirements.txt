@@ -1,0 +1,17 @@
+fastapi==0.162.2
+uvicorn[standard]==0.54.0
+sqlalchemy==2.1.8
+pandas==3.1.1
+numpy==2.5.4
+pydantic==2.14.3
+pydantic-settings==2.16.2
+httpx==0.28.1
+requests==2.34.2
+APScheduler==3.11.3
+tenacity==9.2.1
+python-dotenv==1.2.4
+openpyxl==3.1.5
+pywin32==312
+pytest==9.2.0
+pytest-asyncio==1.4.1.post1
+pyinstaller==6.22.3

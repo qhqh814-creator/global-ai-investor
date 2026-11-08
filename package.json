@@ -1,0 +1,81 @@
+{
+  "name": "global-ai-investor",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Global AI Investor V1.0 (China A-share edition)",
+  "main": "electron/dist/main.js",
+  "author": "Global AI Investor",
+  "license": "UNLICENSED",
+  "scripts": {
+    "dev:renderer": "vite",
+    "build:electron": "tsc -p electron/tsconfig.json",
+    "dev:electron": "wait-on http://127.0.0.1:5173 && npm run build:electron && cross-env ELECTRON_RUN_AS_NODE= VITE_DEV_SERVER_URL=http://127.0.0.1:5173 electron .",
+    "dev": "concurrently -k \"npm:dev:renderer\" \"npm:dev:electron\"",
+    "build:renderer": "vite build",
+    "build": "npm run build:electron && npm run build:renderer",
+    "dist": "npm run build && electron-builder --win nsis",
+    "typecheck": "tsc --noEmit -p tsconfig.json && tsc --noEmit -p electron/tsconfig.json",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@tanstack/react-query": "^5.62.0",
+    "echarts": "^5.5.1",
+    "i18next": "^24.0.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-i18next": "^15.1.0",
+    "react-router-dom": "^7.0.0",
+    "zustand": "^5.0.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.9.0",
+    "@types/react": "^18.3.12",
+    "@types/react-dom": "^18.3.1",
+    "@vitejs/plugin-react": "^4.3.3",
+    "concurrently": "^9.1.0",
+    "cross-env": "^7.0.3",
+    "electron": "^33.2.0",
+    "electron-builder": "^25.1.8",
+    "typescript": "^5.6.3",
+    "vite": "^5.4.11",
+    "vitest": "^2.1.5",
+    "wait-on": "^8.0.1"
+  },
+  "build": {
+    "appId": "com.globalai.investor",
+    "productName": "Global AI Investor",
+    "directories": {
+      "output": "release",
+      "buildResources": "build"
+    },
+    "files": [
+      "electron/dist/**/*",
+      "dist/renderer/**/*",
+      "package.json"
+    ],
+    "extraResources": [
+      {
+        "from": "backend/dist/global-ai-investor-backend",
+        "to": "backend"
+      },
+      {
+        "from": "app/rules",
+        "to": "rules"
+      }
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": ["x64"]
+        }
+      ]
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true
+    }
+  }
+}

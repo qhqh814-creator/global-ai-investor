@@ -1,4 +1,4 @@
-﻿# Global AI Investor V1.0（中国A股版）
+# Global AI Investor V1.0（中国A股版）
 
 Windows 独立桌面应用：A股真实数据采集 + 配置化交易规则引擎 + 本地/DeepSeek AI 分析 + 驾驶舱 + 四级警报 + 回测 + 模拟交易 + 预测准确率统计。中英文双语。
 
@@ -93,3 +93,9 @@ F:\GlobalAIInvestor
 - 实测：4 只买入候选（600959/603610/300243/600362），持仓建议 002036 REDUCE、600000 HOLD。
 - 详见 [docs/11-第二轮AI买卖建议-v0.2.md](F:\GlobalAIInvestor\docs\11-第二轮AI买卖建议-v0.2.md)。
 
+
+## 界面语言修复（2026-11-08）
+
+- 中文界面顶栏品牌改为“全球AI投资家”，窗口标题改为“全球AI投资家 · A股智能研究终端”；英文切换保持 Global AI Investor。
+- 驾驶舱“模拟账户资产”已接入真实模拟账户总资产。
+- 新安装包 SHA256：`5222D5A44040BAFE81663F4B8BAC60701B5AF18634CA92DFB27719E0523008DE`。

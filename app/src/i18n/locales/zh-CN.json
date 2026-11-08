@@ -1,7 +1,8 @@
 {
   "app": {
-    "title": "Global AI Investor",
-    "subtitle": "A股智能研究终端"
+    "title": "全球AI投资家",
+    "subtitle": "A股智能研究终端",
+    "windowTitle": "全球AI投资家 · A股智能研究终端"
   },
   "nav": {
     "dashboard": "驾驶舱",

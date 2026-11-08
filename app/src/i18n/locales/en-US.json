@@ -1,7 +1,8 @@
 {
   "app": {
     "title": "Global AI Investor",
-    "subtitle": "A-share Intelligent Research Terminal"
+    "subtitle": "A-share Intelligent Research Terminal",
+    "windowTitle": "Global AI Investor · A-share Intelligent Research Terminal"
   },
   "nav": {
     "dashboard": "Dashboard",

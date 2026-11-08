@@ -373,12 +373,21 @@ def get_dashboard(conn: sqlite3.Connection) -> dict:
     signal_count = conn.execute("SELECT COUNT(*) AS n FROM signals WHERE trade_date = ?", (signal_date,)).fetchone()["n"]
     cards.append(local_card("dashboard.signals", f"{signal_date} 信号 {int(signal_count)} 条" if signal_count else "今日暂无信号"))
 
-    cards.append({"key": "dashboard.paper_account", "value": None, "status": "unavailable",
-                  "reason": "p5_not_connected", "provenance": None})
+    paper = conn.execute("SELECT cash, initial_cash FROM sim_accounts ORDER BY id LIMIT 1").fetchone()
+    if paper:
+        mv = conn.execute(
+            "SELECT COALESCE(SUM(p.qty * q.last), 0) AS mv FROM sim_positions p LEFT JOIN stock_quotes q ON q.code = p.code"
+        ).fetchone()["mv"]
+        total = float(paper["cash"] or 0) + float(mv or 0)
+        cards.append(local_card("dashboard.paper_account", f"模拟总资产 {total:,.2f} 元"))
+    else:
+        cards.append({"key": "dashboard.paper_account", "value": None, "status": "unavailable",
+                      "reason": "no_paper_account", "provenance": None})
     return {"cards": cards, "time": fetched_at}
 
     if breadth:
         cards[6]["value"] += f"（{breadth['note']}）"
     return {"cards": cards, "time": fetched_at}
+
 
 

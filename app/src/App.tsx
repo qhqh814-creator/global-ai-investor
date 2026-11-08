@@ -1,3 +1,4 @@
+﻿import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, Route, Routes, useLocation } from 'react-router-dom';
 import Dashboard from './modules/dashboard/Dashboard';
@@ -27,6 +28,10 @@ const NAV = [
 export default function App() {
   const { t, i18n } = useTranslation();
   const loc = useLocation();
+
+  useEffect(() => {
+    document.title = t('app.windowTitle');
+  }, [t, i18n.language]);
 
   const toggleLang = () => void i18n.changeLanguage(i18n.language === 'zh-CN' ? 'en-US' : 'zh-CN');
 
@@ -64,3 +69,4 @@ export default function App() {
     </div>
   );
 }
+

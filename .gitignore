@@ -25,3 +25,10 @@ data/settings/secrets.dat
 Thumbs.db
 .idea/
 .vscode/
+
+# build artifacts
+backend/dist/
+backend/build-pyinstaller/
+release-test/
+release-test-data/
+build-pyinstaller/

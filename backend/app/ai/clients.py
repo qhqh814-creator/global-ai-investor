@@ -1,4 +1,4 @@
-﻿"""AI clients (P3): local Ollama (experiment) and DeepSeek (formal stage).
+"""AI clients (P3): local Ollama (experiment) and DeepSeek (formal stage).
 
 Both return raw JSON text; the service validates it against AnalysisResult.
 API keys are read from environment or the local settings store (never logged).
@@ -86,6 +86,27 @@ class OllamaClient:
         except Exception:  # noqa: BLE001
             return False
 
+    def complete_json(self, system_prompt: str, user_prompt: str, schema: dict | None = None) -> dict:
+        payload = {
+            "model": self.config.model,
+            "stream": False,
+            "options": {"temperature": 0.2, "num_ctx": 6144},
+            "messages": [
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": user_prompt},
+            ],
+        }
+        if schema:
+            payload["format"] = schema
+        try:
+            with httpx.Client(timeout=self.config.timeout) as client:
+                resp = client.post(f"{self.config.base_url}/api/chat", json=payload)
+                resp.raise_for_status()
+                content = resp.json().get("message", {}).get("content", "")
+        except Exception as exc:  # noqa: BLE001
+            raise AiUnavailable(f"ollama request failed: {exc}") from exc
+        return _extract_json(content)
+
     def analyze(self, user_prompt: str) -> dict:
         payload = {
             "model": self.config.model,
@@ -124,6 +145,28 @@ class DeepSeekClient:
             return resp.status_code == 200
         except Exception:  # noqa: BLE001
             return False
+
+    def complete_json(self, system_prompt: str, user_prompt: str, schema: dict | None = None) -> dict:
+        if not self.config.api_key:
+            raise AiUnavailable("deepseek api key is not configured")
+        url = self.config.base_url.rstrip("/") + "/chat/completions"
+        payload = {
+            "model": self.config.model or "deepseek-chat",
+            "temperature": 0.2,
+            "response_format": {"type": "json_object"},
+            "messages": [
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": user_prompt},
+            ],
+        }
+        try:
+            with httpx.Client(timeout=self.config.timeout) as client:
+                resp = client.post(url, json=payload, headers={"Authorization": f"Bearer {self.config.api_key}"})
+                resp.raise_for_status()
+                content = resp.json()["choices"][0]["message"]["content"]
+        except Exception as exc:  # noqa: BLE001
+            raise AiUnavailable(f"deepseek request failed: {exc}") from exc
+        return _extract_json(content)
 
     def analyze(self, user_prompt: str) -> dict:
         if not self.config.api_key:
@@ -172,6 +215,7 @@ def make_client(provider: str, model: str | None = None) -> OllamaClient | DeepS
             )
         )
     raise AiUnavailable(f"unknown AI provider: {provider}")
+
 
 
 

@@ -19,6 +19,7 @@ from fastapi.responses import JSONResponse
 
 from .datasources.securities_lists import fetch_bse, fetch_sse, fetch_szse
 from .db.migrate import migrate
+from .analysis.team_review import list_team_reviews, run_team_review
 from .analysis import get_recommendation, list_recommendations, run_recommendations, sync_stock_links
 from .ai.secrets import set_secret
 from .ai import (
@@ -373,6 +374,23 @@ def api_ai_analyze(limit: int = 10, provider: str | None = None, model: str | No
         raise HTTPException(status_code=503, detail=str(exc)) from exc
 
 
+@app.post("/api/ai/team-review", dependencies=[Depends(require_token)])
+def api_team_review(code: str, provider: str = "deepseek", model: str = "deepseek-chat") -> dict:
+    client = make_client(provider, model)
+    if not client.available():
+        raise HTTPException(status_code=503, detail=f"{provider}:{model} unavailable")
+    with get_db() as conn:
+        try:
+            return run_team_review(conn, code, client, model_id=f"{provider}:{model}")
+        except ValueError as exc:
+            raise HTTPException(status_code=422, detail=str(exc)) from exc
+
+
+@app.get("/api/ai/team-reviews", dependencies=[Depends(require_token)])
+def api_team_reviews(code: str | None = None, limit: int = 20) -> dict:
+    with get_db() as conn:
+        return {"items": list_team_reviews(conn, code=code, limit=limit)}
+
 @app.get("/api/ai/analysis", dependencies=[Depends(require_token)])
 def api_ai_analysis(limit: int = 50) -> dict:
     with get_db() as conn:
@@ -708,6 +726,7 @@ def api_weekly_latest() -> dict:
 @app.exception_handler(Exception)
 async def unhandled(_request: Request, exc: Exception) -> JSONResponse:
     return JSONResponse(status_code=500, content={"ok": False, "error": str(exc)})
+
 
 
 

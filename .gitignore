@@ -37,3 +37,26 @@ release-trial/
 
 installed/
 release-installed/
+
+# ---------- 由上传助手自动补充 ----------
+out/
+*.exe
+*.msi
+*.dmg
+*.AppImage
+npm-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+desktop.ini
+.vs/
+*.swp
+*~
+!.env.example
+*.pem
+*.key
+*.pfx
+*.p12
+id_rsa
+id_rsa.pub
+*.tmp
+*.bak

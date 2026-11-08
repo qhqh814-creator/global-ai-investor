@@ -5,6 +5,9 @@ import News from './modules/news/News';
 import Alerts from './modules/alerts/Alerts';
 import Watchlist from './modules/watchlist/Watchlist';
 import Signals from './modules/signals/Signals';
+import Backtest from './modules/backtest/Backtest';
+import Paper from './modules/paper/Paper';
+import Predictions from './modules/predictions/Predictions';
 import Settings from './modules/settings/Settings';
 
 const NAV = [
@@ -13,6 +16,9 @@ const NAV = [
   { to: '/alerts', key: 'nav.alerts' },
   { to: '/watchlist', key: 'nav.watchlist' },
   { to: '/signals', key: 'nav.signals' },
+  { to: '/backtest', key: 'nav.backtest' },
+  { to: '/paper', key: 'nav.paper' },
+  { to: '/predictions', key: 'nav.predictions' },
   { to: '/settings', key: 'nav.settings' }
 ];
 
@@ -46,6 +52,9 @@ export default function App() {
           <Route path="/alerts" element={<Alerts />} />
           <Route path="/watchlist" element={<Watchlist />} />
           <Route path="/signals" element={<Signals />} />
+          <Route path="/backtest" element={<Backtest />} />
+          <Route path="/paper" element={<Paper />} />
+          <Route path="/predictions" element={<Predictions />} />
           <Route path="/settings" element={<Settings />} />
         </Routes>
       </main>

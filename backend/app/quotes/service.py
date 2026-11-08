@@ -1,4 +1,4 @@
-"""Dashboard quote aggregation (P2).
+﻿"""Dashboard quote aggregation (P2).
 
 Real snapshots only: if a source fails, cards report unavailable with a reason.
 Breadth / limit counts are computed from the effective rule library (never a
@@ -354,8 +354,13 @@ def get_dashboard(conn: sqlite3.Connection) -> dict:
     ).fetchone()["n"]
     cards.append(local_card("dashboard.risk_alerts", f"未处理警报 {int(open_alerts)} 条（L2+）"))
 
+    ai_buy = conn.execute(
+        "SELECT COUNT(*) AS n FROM ai_recommendations WHERE reco_type='BUY' AND status='ACTIVE'"
+    ).fetchone()["n"]
     last_run = conn.execute("SELECT result_count FROM screening_runs ORDER BY id DESC LIMIT 1").fetchone()
-    if last_run:
+    if ai_buy:
+        cards.append(local_card("dashboard.ai_opportunities", f"AI买入候选 {int(ai_buy)} 只（新闻证据驱动）"))
+    elif last_run:
         cards.append(local_card("dashboard.ai_opportunities", f"AI初筛候选 {int(last_run['result_count'])} 只"))
     else:
         cards.append(local_card("dashboard.ai_opportunities", None, "no_screening_run"))
@@ -375,4 +380,5 @@ def get_dashboard(conn: sqlite3.Connection) -> dict:
     if breadth:
         cards[6]["value"] += f"（{breadth['note']}）"
     return {"cards": cards, "time": fetched_at}
+
 

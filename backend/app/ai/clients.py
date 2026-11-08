@@ -1,4 +1,4 @@
-"""AI clients (P3): local Ollama (experiment) and DeepSeek (formal stage).
+﻿"""AI clients (P3): local Ollama (experiment) and DeepSeek (formal stage).
 
 Both return raw JSON text; the service validates it against AnalysisResult.
 API keys are read from environment or the local settings store (never logged).
@@ -9,6 +9,8 @@ from __future__ import annotations
 import json
 import os
 from dataclasses import dataclass
+
+from .secrets import get_secret
 
 import httpx
 
@@ -110,7 +112,18 @@ class DeepSeekClient:
         self.config = config
 
     def available(self) -> bool:
-        return bool(self.config.api_key)
+        """Key presence + live /models check (invalid keys must not look available)."""
+        if not self.config.api_key:
+            return False
+        try:
+            with httpx.Client(timeout=8.0) as client:
+                resp = client.get(
+                    self.config.base_url.rstrip("/") + "/models",
+                    headers={"Authorization": f"Bearer {self.config.api_key}"},
+                )
+            return resp.status_code == 200
+        except Exception:  # noqa: BLE001
+            return False
 
     def analyze(self, user_prompt: str) -> dict:
         if not self.config.api_key:
@@ -155,9 +168,11 @@ def make_client(provider: str, model: str | None = None) -> OllamaClient | DeepS
                 provider="deepseek",
                 model=model or os.environ.get("DEEPSEEK_MODEL", "deepseek-chat"),
                 base_url=os.environ.get("DEEPSEEK_BASE_URL", "https://api.deepseek.com"),
-                api_key=os.environ.get("DEEPSEEK_API_KEY"),
+                api_key=os.environ.get("DEEPSEEK_API_KEY") or get_secret("deepseek_api_key"),
             )
         )
     raise AiUnavailable(f"unknown AI provider: {provider}")
+
+
 
 

@@ -1,4 +1,4 @@
-"""Global AI Investor V1.0 backend (FastAPI sidecar).
+﻿"""Global AI Investor V1.0 backend (FastAPI sidecar).
 
 P1: rule library, trading calendar, fee/order validation endpoints.
 Data collection and AI modules land in P2/P3.
@@ -19,6 +19,8 @@ from fastapi.responses import JSONResponse
 
 from .datasources.securities_lists import fetch_bse, fetch_sse, fetch_szse
 from .db.migrate import migrate
+from .analysis import get_recommendation, list_recommendations, run_recommendations, sync_stock_links
+from .ai.secrets import set_secret
 from .ai import (
     AiUnavailable,
     acknowledge_alert,
@@ -587,9 +589,59 @@ def api_accuracy() -> dict:
         return accuracy(conn)
 
 
+@app.post("/api/ai/stock-links/refresh", dependencies=[Depends(require_token)])
+def api_ai_stock_links() -> dict:
+    with get_db() as conn:
+        return sync_stock_links(conn)
+
+
+@app.post("/api/ai/recommendations/run", dependencies=[Depends(require_token)])
+def api_ai_recommendations_run(provider: str | None = None, model: str | None = None) -> dict:
+    """Aggregate evidence-linked buy candidates and holding advice.
+
+    Source analyses are AI-generated; this step is deterministic so it cannot
+    invent news, prices or financial numbers. Missing evidence yields no reco.
+    """
+    model_id = f"{provider or 'local'}:{model}" if (provider or model) else "evidence-aggregator"
+    with get_db() as conn:
+        return run_recommendations(conn, model_id=model_id)
+
+
+@app.get("/api/ai/recommendations", dependencies=[Depends(require_token)])
+def api_ai_recommendations(reco_type: str | None = None, limit: int = 100) -> dict:
+    with get_db() as conn:
+        return {"items": list_recommendations(conn, reco_type=reco_type, limit=limit)}
+
+
+@app.get("/api/ai/recommendations/{reco_id}", dependencies=[Depends(require_token)])
+def api_ai_recommendation_detail(reco_id: int) -> dict:
+    with get_db() as conn:
+        item = get_recommendation(conn, reco_id)
+    if not item:
+        raise HTTPException(status_code=404, detail="recommendation not found")
+    return item
+
+
+class AiKeyIn(BaseModel):
+    provider: str = "deepseek"
+    key: str
+
+
+@app.post("/api/settings/ai-key", dependencies=[Depends(require_token)])
+def api_set_ai_key(payload: AiKeyIn) -> dict:
+    """Store an API key with Windows DPAPI (never returned, never logged)."""
+    provider = payload.provider.lower()
+    if provider not in ("deepseek", "ollama"):
+        raise HTTPException(status_code=422, detail="provider must be deepseek/ollama")
+    set_secret(f"{provider}_api_key", payload.key.strip())
+    return {"ok": True, "provider": provider}
+
+
 @app.exception_handler(Exception)
 async def unhandled(_request: Request, exc: Exception) -> JSONResponse:
     return JSONResponse(status_code=500, content={"ok": False, "error": str(exc)})
+
+
 
 
 

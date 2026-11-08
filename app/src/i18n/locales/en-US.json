@@ -12,7 +12,8 @@
     "signals": "Signals",
     "backtest": "Backtest",
     "paper": "Paper Trading",
-    "predictions": "Prediction Accuracy"
+    "predictions": "Prediction Accuracy",
+    "aiadvice": "AI Advice"
   },
   "dashboard": {
     "title": "Market Dashboard",
@@ -69,7 +70,16 @@
     "datasources": "Data sources",
     "about": "About",
     "disclaimer": "Data is for reference only and does not constitute investment advice. Third-party quotes are unlicensed snapshots, not real-time data.",
-    "version": "Version"
+    "version": "Version",
+    "ai": "AI service",
+    "aiAvailable": "available",
+    "aiUnavailable": "unavailable",
+    "aiKeyHint": "The DeepSeek API key is encrypted locally with Windows DPAPI; it is never uploaded or logged.",
+    "aiKeyPlaceholder": "Enter DeepSeek API key",
+    "save": "Save",
+    "aiKeySaved": "Saved and re-checked",
+    "aiKeyFailed": "Save failed",
+    "datasourceHint": "Data-source authorization/status is shown on the AI Advice page and docs/04."
   },
   "news": {
     "title": "News & Announcements",
@@ -174,5 +184,25 @@
     "created": "Created",
     "createFailed": "Create failed",
     "settled": "Settled"
+  },
+  "aiadvice": {
+    "title": "AI Investment Advice",
+    "subtitle": "Buy candidates and sell rationale derived from real news/announcement AI analysis, with quoted evidence",
+    "run": "Re-analyze",
+    "buySection": "Buy candidates (news-evidence driven)",
+    "holdSection": "Holding advice (sell/reduce/hold)",
+    "emptyBuy": "No buy candidates: no recent positive AI analysis with L2+ materiality linked to a listed stock.",
+    "emptyHold": "No paper positions, or quotes unavailable for the held stock.",
+    "confidence": "Confidence",
+    "model": "Model",
+    "horizon": "Horizon",
+    "last": "Last",
+    "quoteTime": "Data time",
+    "notRealtime": "not real-time",
+    "position": "Position",
+    "sellable": "Sellable",
+    "cost": "Cost",
+    "evidence": "Evidence chain",
+    "disclaimer": "For research assistance only, based on public news/announcements and local rules. Not investment advice. Data may be delayed or unlicensed; verify original sources."
   }
 }

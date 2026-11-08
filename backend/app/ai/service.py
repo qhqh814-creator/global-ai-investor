@@ -224,3 +224,50 @@ def acknowledge_alert(conn: sqlite3.Connection, alert_id: int) -> bool:
         )
     return cur.rowcount > 0
 
+
+def analyze_selected(conn: sqlite3.Connection, client, selected: list[dict], model_id: str | None = None) -> dict:
+    """Analyze explicitly selected targets (scripts/tests). Same validation as batch."""
+    ensure_alert_rules(conn)
+    analyzed = 0
+    alerts = 0
+    failures: list[str] = []
+    for target in selected:
+        prompt = build_prompt(target)
+        try:
+            raw = client.analyze(prompt)
+            result = AnalysisResult.model_validate(raw)
+            validate_evidence(result, target)
+        except Exception as exc:  # noqa: BLE001
+            _task_upsert(conn, target, "FAILED", f"{type(exc).__name__}: {exc}", model_id)
+            failures.append(f"{target['target_type']}:{target['id']}: {exc}")
+            continue
+        ts = now_iso()
+        with conn:
+            conn.execute(
+                """
+                INSERT INTO ai_analysis(target_type, target_id, event_type, sentiment, materiality,
+                    summary, stocks_json, evidence_json, model_id, created_at)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                ON CONFLICT(target_type, target_id) DO UPDATE SET
+                    event_type=excluded.event_type, sentiment=excluded.sentiment,
+                    materiality=excluded.materiality, summary=excluded.summary,
+                    stocks_json=excluded.stocks_json, evidence_json=excluded.evidence_json,
+                    model_id=excluded.model_id
+                """,
+                (target["target_type"], target["id"], result.event_type, result.sentiment,
+                 result.materiality, result.summary, json.dumps(result.stocks, ensure_ascii=False),
+                 json.dumps([e.model_dump() for e in result.evidence], ensure_ascii=False), model_id, ts),
+            )
+            if result.materiality in ALERT_LEVELS:
+                conn.execute(
+                    "INSERT INTO alerts(level,title,summary,security_codes_json,evidence_json,source_type,source_id,status,triggered_at,updated_at) "
+                    "VALUES (?,?,?,?,?,?,?, 'OPEN', ?, ?)",
+                    (result.materiality, target["title"][:200], result.summary,
+                     json.dumps(result.stocks, ensure_ascii=False),
+                     json.dumps([e.model_dump() for e in result.evidence], ensure_ascii=False),
+                     target["target_type"], target["id"], ts, ts),
+                )
+                alerts += 1
+        _task_upsert(conn, target, "DONE", None, model_id)
+        analyzed += 1
+    return {"pending": len(selected), "analyzed": analyzed, "alerts": alerts, "failures": failures}

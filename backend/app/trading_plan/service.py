@@ -1,4 +1,4 @@
-"""Evidence-linked AI trade plans + one-week forward paper simulation.
+﻿"""Evidence-linked AI trade plans + one-week forward paper simulation.
 
 Rules:
 - Only AI buy candidates become BUY plans; holdings with negative analysis become SELL plans.
@@ -206,6 +206,14 @@ def start_weekly_sim(conn: sqlite3.Connection, initial_cash: float = CAPITAL) ->
         "SELECT id, code, entry_price, stop_loss, take_profit, qty, position_value FROM ai_trade_plans "
         "WHERE status IN ('READY','WATCH') AND action='BUY' ORDER BY id DESC LIMIT 5"
     ).fetchall()
+    existing = conn.execute(
+        "SELECT * FROM weekly_sims WHERE start_date=? AND status IN ('PENDING','ACTIVE') ORDER BY id DESC LIMIT 1",
+        (start.isoformat(),),
+    ).fetchone()
+    if existing:
+        count = conn.execute("SELECT COUNT(*) AS n FROM weekly_sim_plans WHERE sim_id=?", (existing["id"],)).fetchone()["n"]
+        return {"sim_id": existing["id"], "start_date": existing["start_date"], "plans": count,
+                "status": existing["status"], "existing": True}
     with conn:
         cur = conn.execute(
             "INSERT INTO weekly_sims(name, start_date, initial_cash, cash, benchmark_code, benchmark_start_value, status, note, created_at) "
@@ -456,4 +464,5 @@ def evaluate_weekly(conn: sqlite3.Connection, fetch: bool = True) -> dict:
     return {"status": result["status"], "equity": result["equity"], "total_return": result["total_return"],
             "benchmark_return": result["benchmark_return"], "closed_trades": result["closed_trades"],
             "marks": result["marks"], "message": "已按真实日线数据结算"}
+
 

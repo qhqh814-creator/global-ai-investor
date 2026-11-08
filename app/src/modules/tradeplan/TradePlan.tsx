@@ -36,6 +36,27 @@ interface WeeklySim {
   note?: string;
 }
 
+interface Reco {
+  id: number;
+  reco_type: string;
+  code: string;
+  name: string | null;
+  action: string;
+  confidence: number | null;
+}
+
+interface PlanMeta {
+  reco_run_id?: number | null;
+  reco_created_at?: string | null;
+  plan_created_at?: string | null;
+}
+
+interface PlanResponse {
+  items: Plan[];
+  recos: Reco[];
+  meta: PlanMeta;
+}
+
 interface Regime {
   regime: string;
   up_ratio: number | null;
@@ -49,17 +70,21 @@ export default function TradePlan() {
   const [plans, setPlans] = useState<Plan[]>([]);
   const [regime, setRegime] = useState<Regime | null>(null);
   const [weekly, setWeekly] = useState<WeeklySim | null>(null);
+  const [recos, setRecos] = useState<Reco[]>([]);
+  const [meta, setMeta] = useState<PlanMeta | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [evaluating, setEvaluating] = useState(false);
   const [loading, setLoading] = useState(true);
 
   const load = async () => {
     const [p, r, w] = await Promise.all([
-      apiGetRaw<{ items: Plan[] }>('/api/trade-plans'),
+      apiGetRaw<PlanResponse>('/api/trade-plans'),
       apiGetRaw<Regime>('/api/market/regime'),
       apiGetRaw<WeeklySim>('/api/weekly/latest')
     ]);
     setPlans(p?.items ?? []);
+    setRecos(p?.recos ?? []);
+    setMeta(p?.meta ?? null);
     setRegime(r);
     setWeekly(w);
     setLoading(false);
@@ -105,6 +130,42 @@ export default function TradePlan() {
       </header>
 
       {message && <p className="meta">{message}</p>}
+      <div className="panel">
+        <h2>{t('tradeplan.relation')}</h2>
+        <p className="meta">{t('tradeplan.relationHint')}</p>
+        <p className="meta">
+          {t('tradeplan.recoTime')}: {meta?.reco_created_at ?? '—'} · {t('tradeplan.planTime')}: {meta?.plan_created_at ?? '—'}
+          {meta?.reco_created_at && meta?.plan_created_at && meta.reco_created_at > meta.plan_created_at ? ` · ${t('tradeplan.stale')}` : ''}
+        </p>
+        <p className="meta">{t('tradeplan.relationNote')}</p>
+        <table className="table">
+          <thead>
+            <tr><th>{t('tradeplan.advice')}</th><th>{t('tradeplan.action')}</th><th>{t('tradeplan.planLabel')}</th><th>{t('tradeplan.entry')}</th></tr>
+          </thead>
+          <tbody>
+            {recos.map((r) => {
+              const plan = plans.find((p) => p.code === r.code && (r.reco_type === 'BUY' ? p.action === 'BUY' : ['SELL', 'REDUCE'].includes(p.action)));
+              let planText = t('tradeplan.noPlan');
+              if (r.action === 'HOLD') planText = t('tradeplan.holdNoPlan');
+              else if (plan) {
+                if (plan.status === 'WATCH') planText = t('tradeplan.watchNoExec');
+                else if (plan.status === 'READY') planText = t('tradeplan.readyNote');
+                else if (plan.status === 'SELL_NOW') planText = t('tradeplan.sellNowNote');
+                else planText = plan.status;
+              }
+              return (
+                <tr key={`${r.reco_type}-${r.code}`}>
+                  <td>{r.name ?? '—'} <span className="meta">{r.code}</span></td>
+                  <td>{r.action}</td>
+                  <td>{planText}</td>
+                  <td>{plan?.entry_price ?? '—'}</td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+
       {regime && (
         <div className="panel">
           <h2>{t('tradeplan.regime')}</h2>

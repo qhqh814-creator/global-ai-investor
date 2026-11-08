@@ -10,11 +10,13 @@ import Backtest from './modules/backtest/Backtest';
 import Paper from './modules/paper/Paper';
 import Predictions from './modules/predictions/Predictions';
 import AiAdvice from './modules/aiadvice/AiAdvice';
+import AiPipeline from './modules/pipeline/AiPipeline';
 import TradePlan from './modules/tradeplan/TradePlan';
 import Settings from './modules/settings/Settings';
 
 const NAV = [
   { to: '/', key: 'nav.dashboard' },
+  { to: '/pipeline', key: 'nav.pipeline' },
   { to: '/news', key: 'nav.news' },
   { to: '/alerts', key: 'nav.alerts' },
   { to: '/watchlist', key: 'nav.watchlist' },
@@ -57,6 +59,7 @@ export default function App() {
       <main className="content">
         <Routes>
           <Route path="/" element={<Dashboard />} />
+          <Route path="/pipeline" element={<AiPipeline />} />
           <Route path="/news" element={<News />} />
           <Route path="/alerts" element={<Alerts />} />
           <Route path="/watchlist" element={<Watchlist />} />

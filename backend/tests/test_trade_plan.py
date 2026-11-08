@@ -218,3 +218,15 @@ def test_sim_force_closes_after_five_trading_days():
     assert st["status"] == "CLOSED"
     assert st["closed_at"] == "2026-11-16" or st["closed_at"] == "2026-11-13"
     assert r["marks"]
+
+def test_weekly_start_is_idempotent():
+    conn = make_db()
+    add_positive(conn)
+    run_recommendations(conn, model_id="test")
+    build_trade_plans(conn, model_id="test")
+    first = start_weekly_sim(conn)
+    second = start_weekly_sim(conn)
+    assert second.get("existing") is True
+    assert second["sim_id"] == first["sim_id"]
+    n = conn.execute("SELECT COUNT(*) AS n FROM weekly_sims").fetchone()["n"]
+    assert n == 1

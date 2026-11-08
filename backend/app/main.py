@@ -34,6 +34,7 @@ from .ai import (
 from .backtest import get_backtest, run_backtest
 from .content import list_announcements, list_news, sync_announcements, sync_news
 from .klines import sync_daily
+from .pipeline import run_pipeline, status as pipeline_status
 from .paper import get_account, list_orders as paper_orders, list_trades as paper_trades, place_order, reset_account
 from .predictions import accuracy, create_prediction, list_predictions, settle_predictions
 from .quotes import get_dashboard, sync_quotes
@@ -142,6 +143,19 @@ def status() -> dict:
         "time": now_iso(),
     }
 
+
+@app.get("/api/pipeline/status", dependencies=[Depends(require_token)])
+def api_pipeline_status() -> dict:
+    with get_db() as conn:
+        return pipeline_status(conn)
+
+
+@app.post("/api/pipeline/run", dependencies=[Depends(require_token)])
+def api_pipeline_run(collect: bool = True, days: int = 3, max_pages: int = 2,
+                     analyze_limit: int = 6, provider: str = "deepseek", model: str = "deepseek-chat") -> dict:
+    with get_db() as conn:
+        return run_pipeline(conn, collect=collect, days=days, max_pages=max_pages,
+                            analyze_limit=analyze_limit, provider=provider, model=model)
 
 @app.get("/api/dashboard", dependencies=[Depends(require_token)])
 def dashboard() -> dict:
@@ -653,7 +667,20 @@ def api_trade_plans_run(model: str | None = None) -> dict:
 @app.get("/api/trade-plans", dependencies=[Depends(require_token)])
 def api_trade_plans(limit: int = 100) -> dict:
     with get_db() as conn:
-        return {"items": list_trade_plans(conn, limit=limit)}
+        plans = list_trade_plans(conn, limit=limit)
+        recos = list_recommendations(conn)
+        run = conn.execute("SELECT id, model_id, created_at FROM recommendation_runs ORDER BY id DESC LIMIT 1").fetchone()
+        latest_plan = conn.execute("SELECT MAX(created_at) AS t FROM ai_trade_plans WHERE status!='SUPERSEDED'").fetchone()
+        return {
+            "items": plans,
+            "recos": recos,
+            "meta": {
+                "reco_run_id": run["id"] if run else None,
+                "reco_model": run["model_id"] if run else None,
+                "reco_created_at": run["created_at"] if run else None,
+                "plan_created_at": latest_plan["t"] if latest_plan else None,
+            },
+        }
 
 
 @app.post("/api/weekly/start", dependencies=[Depends(require_token)])
@@ -676,6 +703,8 @@ def api_weekly_latest() -> dict:
 @app.exception_handler(Exception)
 async def unhandled(_request: Request, exc: Exception) -> JSONResponse:
     return JSONResponse(status_code=500, content={"ok": False, "error": str(exc)})
+
+
 
 
 

@@ -32,3 +32,5 @@ backend/build-pyinstaller/
 release-test/
 release-test-data/
 build-pyinstaller/
+
+release-trial/

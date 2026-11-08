@@ -1,4 +1,4 @@
-﻿"""AI team review: technical + news + capital + risk roles in one evidence-bound call.
+"""AI team review: technical + news + capital + risk roles in one evidence-bound call.
 
 Extracted concept from the reference project (technical/fundamental/capital/risk/
 sentiment agents + team discussion + final decision), reimplemented for this
@@ -133,6 +133,12 @@ def _validate(result: dict, ctx: dict) -> dict:
     if result.get("rating") == "BUY" and all(result.get(k) is not None for k in ("entry_price", "stop_loss", "target_price")):
         if not (result["stop_loss"] < result["entry_price"] < result["target_price"]):
             raise ValueError("BUY prices must satisfy stop_loss < entry < target")
+    for key in ("reasons", "risks"):
+        value = result.get(key)
+        if value is None:
+            result[key] = []
+        elif isinstance(value, str):
+            result[key] = [value]
     corpus = ctx["corpus"]
     raw_evidence = result.get("evidence")
     if isinstance(raw_evidence, str):
@@ -203,4 +209,5 @@ def list_team_reviews(conn: sqlite3.Connection, code: str | None = None, limit: 
             item[key[:-5]] = json.loads(item.pop(key) or "null")
         out.append(item)
     return out
+
 

@@ -208,7 +208,21 @@
     "sellable": "Sellable",
     "cost": "Cost",
     "evidence": "Evidence chain",
-    "disclaimer": "For research assistance only, based on public news/announcements and local rules. Not investment advice. Data may be delayed or unlicensed; verify original sources."
+    "disclaimer": "For research assistance only, based on public news/announcements and local rules. Not investment advice. Data may be delayed or unlicensed; verify original sources.",
+    "teamRun": "Team review",
+    "teamTitle": "AI team review (technical/news/risk)",
+    "teamRating": "Rating",
+    "teamConfidence": "Confidence",
+    "teamTech": "Technical",
+    "teamNews": "News",
+    "teamRisk": "Risk",
+    "teamEntry": "Entry",
+    "teamTarget": "Target",
+    "teamStop": "Stop",
+    "teamReasons": "Reasons",
+    "teamRisks": "Risks",
+    "teamEvidence": "Evidence",
+    "teamError": "Team review failed"
   },
   "tradeplan": {
     "title": "Trade Plan & One-Week Simulation",

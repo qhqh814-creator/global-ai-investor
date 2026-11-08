@@ -27,6 +27,12 @@ export default function Alerts() {
     void load();
   }, []);
 
+  const ackAll = async () => {
+    const open = items.filter((i) => i.status === 'OPEN');
+    await Promise.all(open.map((i) => apiPost(`/api/alerts/${i.id}/ack`)));
+    await load();
+  };
+
   const ack = async (id: number) => {
     await apiPost(`/api/alerts/${id}/ack`);
     await load();
@@ -38,6 +44,10 @@ export default function Alerts() {
         <div>
           <h1>{t('alerts.title')}</h1>
           <p className="subtitle">{t('alerts.subtitle')}</p>
+        </div>
+        <div className="row">
+          <button className="chip" onClick={() => void load()}>{t('alerts.refresh')}</button>
+          <button className="chip primary" onClick={() => void ackAll()} disabled={items.filter((i) => i.status === 'OPEN').length === 0}>{t('alerts.ackAll')}</button>
         </div>
       </header>
 

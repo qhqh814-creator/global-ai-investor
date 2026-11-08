@@ -97,7 +97,9 @@
     "title": "警报中心",
     "subtitle": "仅显示经 AI 分析且有原文证据的警报",
     "empty": "暂无警报",
-    "ack": "确认"
+    "ack": "确认",
+    "refresh": "刷新",
+    "ackAll": "全部确认"
   },
   "watchlist": {
     "title": "股票观察池",

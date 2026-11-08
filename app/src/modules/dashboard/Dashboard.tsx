@@ -87,6 +87,7 @@ export default function Dashboard() {
           return (
             <DataCard
               key={key}
+              to={key === 'risk_alerts' ? '/alerts' : key === 'ai_opportunities' ? '/aiadvice' : undefined}
               title={t(`dashboard.cards.${SHORT_TO_I18N[key] ?? key}`)}
               value={card?.status === 'available' ? card.value : null}
               provenance={card?.provenance ?? null}

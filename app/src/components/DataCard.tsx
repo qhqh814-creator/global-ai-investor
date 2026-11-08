@@ -1,4 +1,5 @@
-﻿import { useTranslation } from 'react-i18next';
+﻿import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import type { Provenance } from '../api/client';
 
 interface Props {
@@ -7,14 +8,15 @@ interface Props {
   provenance?: Provenance | null;
   status?: 'available' | 'unavailable' | 'loading';
   reason?: string;
+  to?: string;
 }
 
-export default function DataCard({ title, value, provenance, status = 'unavailable', reason }: Props) {
+export default function DataCard({ title, value, provenance, status = 'unavailable', reason, to }: Props) {
   const { t } = useTranslation();
   const isAvailable = status === 'available' && value != null;
   const isLocal = provenance?.sourceIds?.includes('local_engine') ?? false;
 
-  return (
+  const body = (
     <section className={isAvailable ? 'card available' : 'card unavailable'}>
       <header className="card-title">{title}</header>
       {status === 'loading' && <div className="card-value muted">{t('data.loading')}</div>}
@@ -44,5 +46,6 @@ export default function DataCard({ title, value, provenance, status = 'unavailab
       )}
     </section>
   );
+  return to ? <Link className="card-link" to={to}>{body}</Link> : body;
 }
 

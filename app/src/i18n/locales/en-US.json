@@ -97,7 +97,9 @@
     "title": "Alert Center",
     "subtitle": "Only AI-analyzed alerts with quoted evidence",
     "empty": "No alerts",
-    "ack": "Acknowledge"
+    "ack": "Acknowledge",
+    "refresh": "Refresh",
+    "ackAll": "Acknowledge all"
   },
   "watchlist": {
     "title": "Watchlist",

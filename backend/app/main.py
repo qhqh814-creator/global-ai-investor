@@ -1,4 +1,4 @@
-"""Global AI Investor V1.0 backend (FastAPI sidecar).
+﻿"""Global AI Investor V1.0 backend (FastAPI sidecar).
 
 P1: rule library, trading calendar, fee/order validation endpoints.
 Data collection and AI modules land in P2/P3.
@@ -18,8 +18,19 @@ from fastapi.responses import JSONResponse
 
 from .datasources.securities_lists import fetch_bse, fetch_sse, fetch_szse
 from .db.migrate import migrate
+from .ai import (
+    AiUnavailable,
+    acknowledge_alert,
+    ai_status,
+    analyze_pending,
+    ensure_alert_rules,
+    list_alerts,
+    list_analysis,
+    make_client,
+)
 from .content import list_announcements, list_news, sync_announcements, sync_news
 from .quotes import get_dashboard, sync_quotes
+from .workers import run_job_now, start_scheduler, stop_scheduler
 from .rules import get_library
 from .rules.store import list_versions as db_rule_versions, stats as db_rule_stats, sync_library
 from .securities import list_securities, stats as securities_stats, upsert_securities
@@ -53,6 +64,7 @@ def bootstrap() -> None:
     with get_db() as conn:
         migrate(conn)
         sync_library(conn)
+        ensure_alert_rules(conn)
         conn.execute(
             "INSERT OR REPLACE INTO app_settings(key, value_json, updated_at) VALUES (?, ?, ?)",
             ("app.last_start", json.dumps({"started_at": now_iso()}), now_iso()),
@@ -84,6 +96,12 @@ async def require_token(request: Request) -> None:
 @app.on_event("startup")
 def on_startup() -> None:
     bootstrap()
+    start_scheduler(get_db)
+
+
+@app.on_event("shutdown")
+def on_shutdown() -> None:
+    stop_scheduler()
 
 
 @app.get("/health")
@@ -268,6 +286,75 @@ def api_securities_sync(exchange: str, max_pages: int | None = None) -> dict:
     return {"exchange": exchange, "upserted": count, "stats": summary}
 
 
+def _ai_client(provider: str | None, model: str | None):
+    try:
+        return make_client(provider or os.environ.get("GAI_AI_PROVIDER", "ollama"), model)
+    except AiUnavailable as exc:
+        raise HTTPException(status_code=503, detail=str(exc)) from exc
+
+
+@app.get("/api/ai/status", dependencies=[Depends(require_token)])
+def api_ai_status(provider: str | None = None, model: str | None = None) -> dict:
+    client = _ai_client(provider, model)
+    with get_db() as conn:
+        status = ai_status(conn, client)
+    return {"provider": provider or os.environ.get("GAI_AI_PROVIDER", "ollama"), **status}
+
+
+@app.post("/api/ai/analyze", dependencies=[Depends(require_token)])
+def api_ai_analyze(limit: int = 10, provider: str | None = None, model: str | None = None) -> dict:
+    client = _ai_client(provider, model)
+    try:
+        if hasattr(client, "available") and not client.available():
+            raise AiUnavailable("configured AI backend is not available")
+        with get_db() as conn:
+            return analyze_pending(conn, client, limit=limit, model_id=model or getattr(client.config, "model", None))
+    except AiUnavailable as exc:
+        raise HTTPException(status_code=503, detail=str(exc)) from exc
+
+
+@app.get("/api/ai/analysis", dependencies=[Depends(require_token)])
+def api_ai_analysis(limit: int = 50) -> dict:
+    with get_db() as conn:
+        return {"items": list_analysis(conn, limit=limit)}
+
+
+@app.get("/api/alerts", dependencies=[Depends(require_token)])
+def api_alerts(level: str | None = None, limit: int = 50) -> dict:
+    with get_db() as conn:
+        return {"items": list_alerts(conn, level=level, limit=limit)}
+
+
+@app.post("/api/alerts/{alert_id}/ack", dependencies=[Depends(require_token)])
+def api_alert_ack(alert_id: int) -> dict:
+    with get_db() as conn:
+        ok = acknowledge_alert(conn, alert_id)
+    if not ok:
+        raise HTTPException(status_code=404, detail="alert not found or already acknowledged")
+    return {"ok": True, "alert_id": alert_id}
+
+
+@app.get("/api/scheduler/jobs", dependencies=[Depends(require_token)])
+def api_scheduler_jobs() -> dict:
+    from .workers import build_scheduler
+
+    sched = build_scheduler(get_db)
+    return {"jobs": [{"id": job.id, "next_run_time": (getattr(job, "next_run_time", None).isoformat() if getattr(job, "next_run_time", None) else None)} for job in sched.get_jobs()]}
+
+
+@app.post("/api/scheduler/trigger/{name}", dependencies=[Depends(require_token)])
+def api_scheduler_trigger(name: str) -> dict:
+    allowed = {"quotes", "news", "announcements", "calendar"}
+    if name not in allowed:
+        raise HTTPException(status_code=422, detail=f"job must be one of {sorted(allowed)}")
+    try:
+        run_job_now(get_db, name)
+    except Exception as exc:  # noqa: BLE001
+        raise HTTPException(status_code=500, detail=str(exc)) from exc
+    return {"ok": True, "job": name}
+
+
 @app.exception_handler(Exception)
 async def unhandled(_request: Request, exc: Exception) -> JSONResponse:
     return JSONResponse(status_code=500, content={"ok": False, "error": str(exc)})
+

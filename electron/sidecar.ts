@@ -29,19 +29,34 @@ function findFreePort(): Promise<number> {
   });
 }
 
-function resolvePython(rootDir: string): string {
+interface LaunchSpec {
+  command: string;
+  args: string[];
+}
+
+function resolveLaunch(rootDir: string): LaunchSpec {
+  // Packaged: PyInstaller sidecar shipped under resources/backend.
+  const packagedExe = join(process.resourcesPath ?? '', 'backend', 'gai-backend.exe');
+  if (process.resourcesPath && existsSync(packagedExe)) {
+    return { command: packagedExe, args: [] };
+  }
   if (process.env.GAI_PYTHON && existsSync(process.env.GAI_PYTHON)) {
-    return process.env.GAI_PYTHON;
+    return {
+      command: process.env.GAI_PYTHON,
+      args: ['-m', 'uvicorn', 'backend.app.main:app', '--host', '127.0.0.1']
+    };
   }
   const venv = join(rootDir, '.venv', 'Scripts', 'python.exe');
-  if (existsSync(venv)) return venv;
-  return 'python';
+  if (existsSync(venv)) {
+    return { command: venv, args: ['-m', 'uvicorn', 'backend.app.main:app', '--host', '127.0.0.1'] };
+  }
+  return { command: 'python', args: ['-m', 'uvicorn', 'backend.app.main:app', '--host', '127.0.0.1'] };
 }
 
 export async function startSidecar(rootDir: string): Promise<SidecarInfo> {
   const port = await findFreePort();
   const token = Buffer.from(crypto.randomUUID()).toString('base64url');
-  const python = resolvePython(rootDir);
+  const launch = resolveLaunch(rootDir);
   const env = {
     ...process.env,
     GAI_ROOT: rootDir,
@@ -50,11 +65,17 @@ export async function startSidecar(rootDir: string): Promise<SidecarInfo> {
     PYTHONUNBUFFERED: '1'
   };
 
-  child = spawn(
-    python,
-    ['-m', 'uvicorn', 'backend.app.main:app', '--host', '127.0.0.1', '--port', String(port)],
-    { cwd: rootDir, env, windowsHide: true, stdio: ['ignore', 'pipe', 'pipe'] }
-  );
+  const args = [...launch.args];
+  if (!launch.command.toLowerCase().endsWith('.exe') || launch.command.toLowerCase().includes('python')) {
+    args.push('--port', String(port));
+  }
+
+  child = spawn(launch.command, args, {
+    cwd: rootDir,
+    env,
+    windowsHide: true,
+    stdio: ['ignore', 'pipe', 'pipe']
+  });
 
   child.stdout?.on('data', (d) => console.log('[sidecar]', d.toString().trim()));
   child.stderr?.on('data', (d) => console.error('[sidecar]', d.toString().trim()));

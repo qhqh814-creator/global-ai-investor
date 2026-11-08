@@ -55,27 +55,29 @@
     ],
     "extraResources": [
       {
-        "from": "backend/dist/global-ai-investor-backend",
+        "from": "backend/dist/gai-backend",
         "to": "backend"
-      },
-      {
-        "from": "app/rules",
-        "to": "rules"
       }
     ],
     "win": {
       "target": [
         {
           "target": "nsis",
-          "arch": ["x64"]
+          "arch": [
+            "x64"
+          ]
         }
-      ]
+      ],
+      "icon": "build/icon.ico",
+      "signAndEditExecutable": false
     },
     "nsis": {
       "oneClick": false,
+      "perMachine": false,
       "allowToChangeInstallationDirectory": true,
       "createDesktopShortcut": true,
-      "createStartMenuShortcut": true
+      "createStartMenuShortcut": true,
+      "artifactName": "GlobalAIInvestor-Setup-${version}.${ext}"
     }
   }
 }

@@ -1,8 +1,11 @@
-import { app, BrowserWindow, ipcMain, shell } from 'electron';
+﻿import { app, BrowserWindow, ipcMain, shell } from 'electron';
+import { existsSync, mkdirSync } from 'node:fs';
 import { join } from 'node:path';
 import { startSidecar, stopSidecar, type SidecarInfo } from './sidecar';
 
-const rootDir = app.isPackaged ? process.resourcesPath : join(__dirname, '..', '..');
+// Packaged app: keep user data on F: (independent deployment), fallback to exe dir.
+const packagedRoot = process.env.GAI_ROOT || (existsSync('F:\\') ? 'F:\\GlobalAIInvestor' : join(process.resourcesPath, '..'));
+const rootDir = app.isPackaged ? packagedRoot : join(__dirname, '..', '..');
 let mainWindow: BrowserWindow | null = null;
 let sidecar: SidecarInfo | null = null;
 
@@ -32,7 +35,7 @@ async function createWindow(): Promise<void> {
   if (devUrl) {
     await mainWindow.loadURL(devUrl);
   } else {
-    await mainWindow.loadFile(join(rootDir, 'dist', 'renderer', 'index.html'));
+    await mainWindow.loadFile(join(app.getAppPath(), 'dist', 'renderer', 'index.html'));
   }
 }
 
@@ -41,6 +44,7 @@ ipcMain.handle('app:version', () => app.getVersion());
 ipcMain.handle('app:rootDir', () => rootDir);
 
 app.whenReady().then(async () => {
+  mkdirSync(rootDir, { recursive: true });
   sidecar = await startSidecar(rootDir);
   console.log('[main] sidecar:', sidecar.status, sidecar.baseUrl, sidecar.error ?? '');
   await createWindow();
@@ -56,3 +60,6 @@ app.on('window-all-closed', () => {
 
 app.on('before-quit', () => stopSidecar());
 app.on('will-quit', () => stopSidecar());
+
+
+

@@ -16,8 +16,11 @@ from pathlib import Path
 from fastapi import Depends, FastAPI, HTTPException, Query, Request
 from fastapi.responses import JSONResponse
 
+from .datasources.securities_lists import fetch_bse, fetch_sse, fetch_szse
 from .db.migrate import migrate
 from .rules import get_library
+from .rules.store import list_versions as db_rule_versions, stats as db_rule_stats, sync_library
+from .securities import list_securities, stats as securities_stats, upsert_securities
 from .trading_calendar import TradingCalendar
 
 ROOT = Path(os.environ.get("GAI_ROOT", Path(__file__).resolve().parents[2]))
@@ -47,6 +50,7 @@ def bootstrap() -> None:
     DB_DIR.mkdir(parents=True, exist_ok=True)
     with get_db() as conn:
         migrate(conn)
+        sync_library(conn)
         conn.execute(
             "INSERT OR REPLACE INTO app_settings(key, value_json, updated_at) VALUES (?, ?, ?)",
             ("app.last_start", json.dumps({"started_at": now_iso()}), now_iso()),
@@ -193,6 +197,49 @@ def calendar_sync(year_month: str) -> dict:
     except Exception as exc:  # network/parse failures must be explicit
         raise HTTPException(status_code=502, detail=f"calendar sync failed: {exc}") from exc
     return {"month": year_month, "synced": count, "source": "szse_calendar"}
+
+
+@app.get("/api/rules/db/versions", dependencies=[Depends(require_token)])
+def rule_db_versions() -> dict:
+    with get_db() as conn:
+        return {"versions": db_rule_versions(conn), **db_rule_stats(conn)}
+
+
+@app.get("/api/securities/stats", dependencies=[Depends(require_token)])
+def api_securities_stats() -> dict:
+    with get_db() as conn:
+        return securities_stats(conn)
+
+
+@app.get("/api/securities", dependencies=[Depends(require_token)])
+def api_securities(
+    exchange: str | None = None,
+    board: str | None = None,
+    limit: int = 100,
+) -> dict:
+    with get_db() as conn:
+        return {"items": list_securities(conn, exchange=exchange, board=board, limit=limit)}
+
+
+@app.post("/api/securities/sync/{exchange}", dependencies=[Depends(require_token)])
+def api_securities_sync(exchange: str, max_pages: int | None = None) -> dict:
+    """Sync one exchange's security master from its registered source.
+
+    SZSE requires ~146 pages (~1-2 min) and accepts max_pages for partial syncs.
+    """
+    exchange = exchange.upper()
+    if exchange == "SSE":
+        records = fetch_sse()
+    elif exchange == "SZSE":
+        records = fetch_szse(max_pages=max_pages)
+    elif exchange == "BSE":
+        records = fetch_bse()
+    else:
+        raise HTTPException(status_code=422, detail="exchange must be SSE/SZSE/BSE")
+    with get_db() as conn:
+        count = upsert_securities(conn, records)
+        summary = securities_stats(conn)
+    return {"exchange": exchange, "upserted": count, "stats": summary}
 
 
 @app.exception_handler(Exception)

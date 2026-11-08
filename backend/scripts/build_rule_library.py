@@ -1,4 +1,4 @@
-"""Build the versioned A-share rule library (data files, P1).
+﻿"""Build the versioned A-share rule library (data files, P1).
 
 This script only SEEDS the JSON rule files; runtime reads the JSON files via
 app.rules.loader. Values marked "待核" must be confirmed against the official
@@ -24,14 +24,20 @@ BSE_URL = "https://www.bse.cn/jygl_list/200028217.html"
 BSE34_URL = "https://www.bse.cn/jygl_list/200029142.html"
 
 
-def sessions(after_hours: bool, after_min: int = 100, after_step: int = 100, pending: bool = False) -> dict:
+def sessions(
+    after_hours: bool,
+    after_min: int = 100,
+    after_step: int = 100,
+    pending: bool = False,
+    order_start: str = "09:30",
+) -> dict:
     if pending:
         ah = {"enabled": False, "status": "PENDING", "order": [], "trade": [], "price": "CLOSE"}
     elif after_hours:
         ah = {
             "enabled": True,
             "status": "EFFECTIVE",
-            "order": [["09:30", "11:30"], ["13:00", "15:30"]],
+            "order": [[order_start, "11:30"], ["13:00", "15:30"]],
             "trade": ["15:05", "15:30"],
             "price": "CLOSE",
             "min_qty": after_min,
@@ -112,6 +118,7 @@ def rule_set(
     fee_params: dict,
     cap: int | None = None,
     notes: list[str] | None = None,
+    market_order_allowed: bool = True,
 ) -> dict:
     return {
         "risk_flag": risk,
@@ -124,6 +131,7 @@ def rule_set(
         "sessions": sess,
         "settlement": "T+1",
         "risk_warning_buy_daily_cap": cap,
+        "market_order_allowed": market_order_allowed,
         "notes": notes or [],
     }
 
@@ -133,15 +141,22 @@ def main_board_sets(
     sess_main: dict,
     fee_params: dict,
     st_cap: int | None = None,
+    market_orders: bool = True,
 ) -> list[dict]:
     cap = 500_000 if st_cap is None else st_cap
+    risk_note = ["风险警示股票单日买入≤50万股（规则4.4.10/4.5.4）"]
+    if not market_orders:
+        risk_note.append("风险警示/退市整理股票须采用限价委托（沪市规则4.4.9）")
     return [
         rule_set("NORMAL", "SEASONED", pct(0.10, 0.10), order(100, 100, True, 1_000_000, None, 100), cage("hs"), sess_main, fee_params),
         rule_set("NORMAL", "IPO_DAY1", first_day_special(), order(100, 100, True, 1_000_000, None, 100), cage("hs"), sess_main, fee_params),
         rule_set("NORMAL", "IPO_DAY2_5", pct(0.10, 0.10), order(100, 100, True, 1_000_000, None, 100), cage("hs"), sess_main, fee_params),
-        rule_set("ST", "SEASONED", pct(st_pct, st_pct), order(100, 100, True, 1_000_000, None, 100), cage("hs"), sess_main, fee_params, cap),
-        rule_set("DELISTING", "IPO_DAY1", no_limit(), order(100, 100, True, 1_000_000, None, 100), cage("hs"), sess_main, fee_params),
-        rule_set("DELISTING", "SEASONED", pct(0.10, 0.10), order(100, 100, True, 1_000_000, None, 100), cage("hs"), sess_main, fee_params),
+        rule_set("ST", "SEASONED", pct(st_pct, st_pct), order(100, 100, True, 1_000_000, None, 100), cage("hs"), sess_main, fee_params, cap,
+                 notes=risk_note, market_order_allowed=market_orders),
+        rule_set("DELISTING", "IPO_DAY1", no_limit(), order(100, 100, True, 1_000_000, None, 100), cage("hs"), sess_main, fee_params,
+                 market_order_allowed=market_orders),
+        rule_set("DELISTING", "SEASONED", pct(0.10, 0.10), order(100, 100, True, 1_000_000, None, 100), cage("hs"), sess_main, fee_params,
+                 market_order_allowed=market_orders),
     ]
 
 
@@ -223,17 +238,17 @@ def build() -> list[tuple[str, dict]]:
 
     out.append(("sse/2023.02.17.json", version(
         "SSE-2023.02.17", "SSE", "上证发〔2023〕32号", "2023-02-17", "2023-02-17", "2023-08-27", SSE_URL, None,
-        {"MAIN": main_board_sets(0.05, sse_sess_2023, sse_fees_2023_early),
+        {"MAIN": main_board_sets(0.05, sse_sess_2023, sse_fees_2023_early, market_orders=False),
          "STAR": star_sets(sse_star_sess_2023, sse_fees_2023_early)},
     )))
     out.append(("sse/2023.08.28.json", version(
         "SSE-2023.08.28", "SSE", "上证发〔2023〕32号", "2023-02-17", "2023-08-28", "2026-07-05", SSE_URL, "SSE-2023.02.17",
-        {"MAIN": main_board_sets(0.05, sse_sess_2023, sse_fees_2023_late),
+        {"MAIN": main_board_sets(0.05, sse_sess_2023, sse_fees_2023_late, market_orders=False),
          "STAR": star_sets(sse_star_sess_2023, sse_fees_2023_late)},
     )))
     out.append(("sse/2026.07.06.json", version(
         "SSE-2026.07.06", "SSE", "上证发〔2026〕41号", "2026-04-24", "2026-07-06", None, SSE_URL, "SSE-2023.08.28",
-        {"MAIN": main_board_sets(0.10, sse_sess_2026, sse_fees_2023_late),
+        {"MAIN": main_board_sets(0.10, sse_sess_2026, sse_fees_2023_late, market_orders=False),
          "STAR": star_sets(sse_star_sess_2026, sse_fees_2023_late)},
         clauses=[{"clause_no": "3.7", "title": "盘后固定价格交易扩至全部A股及ETF", "status": "EFFECTIVE",
                   "note": "2026-07-06 起"}],
@@ -243,9 +258,9 @@ def build() -> list[tuple[str, dict]]:
     szse_fees_early = fees(0.001, 0.0000487)
     szse_fees_late = fees(0.0005, 0.0000341)
     szse_sess_2023 = sessions(after_hours=False)
-    szse_cn_sess_2023 = sessions(after_hours=True, after_min=100, after_step=100)
-    szse_sess_2026 = sessions(after_hours=True, after_min=100, after_step=100)
-    szse_cn_sess_2026 = sessions(after_hours=True, after_min=100, after_step=100)
+    szse_cn_sess_2023 = sessions(after_hours=True, after_min=100, after_step=100, order_start="09:15")
+    szse_sess_2026 = sessions(after_hours=True, after_min=100, after_step=100, order_start="09:15")
+    szse_cn_sess_2026 = sessions(after_hours=True, after_min=100, after_step=100, order_start="09:15")
 
     out.append(("szse/2023.02.17.json", version(
         "SZSE-2023.02.17", "SZSE", "深证上〔2023〕98号", "2023-02-17", "2023-02-17", "2023-08-27", SZSE_URL, None,
@@ -308,3 +323,6 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
+
+
+

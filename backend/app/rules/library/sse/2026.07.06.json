@@ -95,6 +95,7 @@
           },
           "settlement": "T+1",
           "risk_warning_buy_daily_cap": null,
+          "market_order_allowed": true,
           "notes": []
         },
         {
@@ -179,6 +180,7 @@
           },
           "settlement": "T+1",
           "risk_warning_buy_daily_cap": null,
+          "market_order_allowed": true,
           "notes": []
         },
         {
@@ -258,6 +260,7 @@
           },
           "settlement": "T+1",
           "risk_warning_buy_daily_cap": null,
+          "market_order_allowed": true,
           "notes": []
         },
         {
@@ -337,7 +340,11 @@
           },
           "settlement": "T+1",
           "risk_warning_buy_daily_cap": 500000,
-          "notes": []
+          "market_order_allowed": false,
+          "notes": [
+            "风险警示股票单日买入≤50万股（规则4.4.10/4.5.4）",
+            "风险警示/退市整理股票须采用限价委托（沪市规则4.4.9）"
+          ]
         },
         {
           "risk_flag": "DELISTING",
@@ -414,6 +421,7 @@
           },
           "settlement": "T+1",
           "risk_warning_buy_daily_cap": null,
+          "market_order_allowed": false,
           "notes": []
         },
         {
@@ -493,6 +501,7 @@
           },
           "settlement": "T+1",
           "risk_warning_buy_daily_cap": null,
+          "market_order_allowed": false,
           "notes": []
         }
       ]
@@ -576,6 +585,7 @@
           },
           "settlement": "T+1",
           "risk_warning_buy_daily_cap": null,
+          "market_order_allowed": true,
           "notes": []
         },
         {
@@ -653,6 +663,7 @@
           },
           "settlement": "T+1",
           "risk_warning_buy_daily_cap": null,
+          "market_order_allowed": true,
           "notes": []
         },
         {
@@ -730,6 +741,7 @@
           },
           "settlement": "T+1",
           "risk_warning_buy_daily_cap": null,
+          "market_order_allowed": true,
           "notes": []
         },
         {
@@ -809,6 +821,7 @@
           },
           "settlement": "T+1",
           "risk_warning_buy_daily_cap": null,
+          "market_order_allowed": true,
           "notes": [
             "科创板风险警示股票不进入风险警示板，不适用50万股限制"
           ]
@@ -888,6 +901,7 @@
           },
           "settlement": "T+1",
           "risk_warning_buy_daily_cap": null,
+          "market_order_allowed": true,
           "notes": []
         },
         {
@@ -967,6 +981,7 @@
           },
           "settlement": "T+1",
           "risk_warning_buy_daily_cap": null,
+          "market_order_allowed": true,
           "notes": [
             "退市整理期次日起20%：推断，待核"
           ]

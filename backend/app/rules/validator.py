@@ -95,6 +95,8 @@ def validate_order(order: OrderRequest, version: RuleVersion, rules: RuleSet) ->
             errors.append("QTY_ABOVE_MAX")
 
     # ---- price tick ---------------------------------------------------
+    if order.order_type == "MARKET" and not rules.market_order_allowed:
+        errors.append("MARKET_ORDER_NOT_ALLOWED")
     if order.order_type == "LIMIT":
         if order.price is None:
             errors.append("PRICE_REQUIRED")

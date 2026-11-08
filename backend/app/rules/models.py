@@ -1,4 +1,4 @@
-"""Rule library domain models (P1).
+﻿"""Rule library domain models (P1).
 
 All trading rules are data, never hard-coded. Missing rules raise RuleNotFound
 instead of silently falling back to a default (e.g. 10%).
@@ -98,6 +98,7 @@ class RuleSet(BaseModel):
     sessions: Sessions
     settlement: Literal["T+1", "T+0"] = "T+1"
     risk_warning_buy_daily_cap: int | None = None
+    market_order_allowed: bool = True
     notes: list[str] = Field(default_factory=list)
 
 
@@ -137,3 +138,4 @@ class RuleVersion(BaseModel):
 
     def effective_on(self, on_date: date) -> bool:
         return self.effective_from <= on_date and (self.effective_to is None or on_date <= self.effective_to)
+

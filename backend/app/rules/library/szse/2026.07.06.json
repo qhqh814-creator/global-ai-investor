@@ -75,7 +75,7 @@
               "status": "EFFECTIVE",
               "order": [
                 [
-                  "09:30",
+                  "09:15",
                   "11:30"
                 ],
                 [
@@ -95,6 +95,7 @@
           },
           "settlement": "T+1",
           "risk_warning_buy_daily_cap": null,
+          "market_order_allowed": true,
           "notes": []
         },
         {
@@ -159,7 +160,7 @@
               "status": "EFFECTIVE",
               "order": [
                 [
-                  "09:30",
+                  "09:15",
                   "11:30"
                 ],
                 [
@@ -179,6 +180,7 @@
           },
           "settlement": "T+1",
           "risk_warning_buy_daily_cap": null,
+          "market_order_allowed": true,
           "notes": []
         },
         {
@@ -238,7 +240,7 @@
               "status": "EFFECTIVE",
               "order": [
                 [
-                  "09:30",
+                  "09:15",
                   "11:30"
                 ],
                 [
@@ -258,6 +260,7 @@
           },
           "settlement": "T+1",
           "risk_warning_buy_daily_cap": null,
+          "market_order_allowed": true,
           "notes": []
         },
         {
@@ -317,7 +320,7 @@
               "status": "EFFECTIVE",
               "order": [
                 [
-                  "09:30",
+                  "09:15",
                   "11:30"
                 ],
                 [
@@ -337,7 +340,10 @@
           },
           "settlement": "T+1",
           "risk_warning_buy_daily_cap": 500000,
-          "notes": []
+          "market_order_allowed": true,
+          "notes": [
+            "风险警示股票单日买入≤50万股（规则4.4.10/4.5.4）"
+          ]
         },
         {
           "risk_flag": "DELISTING",
@@ -394,7 +400,7 @@
               "status": "EFFECTIVE",
               "order": [
                 [
-                  "09:30",
+                  "09:15",
                   "11:30"
                 ],
                 [
@@ -414,6 +420,7 @@
           },
           "settlement": "T+1",
           "risk_warning_buy_daily_cap": null,
+          "market_order_allowed": true,
           "notes": []
         },
         {
@@ -473,7 +480,7 @@
               "status": "EFFECTIVE",
               "order": [
                 [
-                  "09:30",
+                  "09:15",
                   "11:30"
                 ],
                 [
@@ -493,6 +500,7 @@
           },
           "settlement": "T+1",
           "risk_warning_buy_daily_cap": null,
+          "market_order_allowed": true,
           "notes": []
         }
       ]
@@ -556,7 +564,7 @@
               "status": "EFFECTIVE",
               "order": [
                 [
-                  "09:30",
+                  "09:15",
                   "11:30"
                 ],
                 [
@@ -576,6 +584,7 @@
           },
           "settlement": "T+1",
           "risk_warning_buy_daily_cap": null,
+          "market_order_allowed": true,
           "notes": []
         },
         {
@@ -633,7 +642,7 @@
               "status": "EFFECTIVE",
               "order": [
                 [
-                  "09:30",
+                  "09:15",
                   "11:30"
                 ],
                 [
@@ -653,6 +662,7 @@
           },
           "settlement": "T+1",
           "risk_warning_buy_daily_cap": null,
+          "market_order_allowed": true,
           "notes": []
         },
         {
@@ -710,7 +720,7 @@
               "status": "EFFECTIVE",
               "order": [
                 [
-                  "09:30",
+                  "09:15",
                   "11:30"
                 ],
                 [
@@ -730,6 +740,7 @@
           },
           "settlement": "T+1",
           "risk_warning_buy_daily_cap": null,
+          "market_order_allowed": true,
           "notes": []
         },
         {
@@ -789,7 +800,7 @@
               "status": "EFFECTIVE",
               "order": [
                 [
-                  "09:30",
+                  "09:15",
                   "11:30"
                 ],
                 [
@@ -809,6 +820,7 @@
           },
           "settlement": "T+1",
           "risk_warning_buy_daily_cap": 500000,
+          "market_order_allowed": true,
           "notes": []
         },
         {
@@ -866,7 +878,7 @@
               "status": "EFFECTIVE",
               "order": [
                 [
-                  "09:30",
+                  "09:15",
                   "11:30"
                 ],
                 [
@@ -886,6 +898,7 @@
           },
           "settlement": "T+1",
           "risk_warning_buy_daily_cap": null,
+          "market_order_allowed": true,
           "notes": []
         },
         {
@@ -945,7 +958,7 @@
               "status": "EFFECTIVE",
               "order": [
                 [
-                  "09:30",
+                  "09:15",
                   "11:30"
                 ],
                 [
@@ -965,6 +978,7 @@
           },
           "settlement": "T+1",
           "risk_warning_buy_daily_cap": null,
+          "market_order_allowed": true,
           "notes": []
         }
       ]

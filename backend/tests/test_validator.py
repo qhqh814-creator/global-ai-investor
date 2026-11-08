@@ -156,6 +156,18 @@ def test_new_stock_first_day(library):
     assert result.ok, result.errors
 
 
+def test_st_limit_order_only_sse(library):
+    version, rules = rules_for(library, risk="ST")
+    result = validate_order(order(order_type="MARKET", price=None), version, rules)
+    assert "MARKET_ORDER_NOT_ALLOWED" in result.errors
+
+
+def test_market_order_allowed_for_normal_sse(library):
+    version, rules = rules_for(library)
+    result = validate_order(order(order_type="MARKET", price=None), version, rules)
+    assert result.ok, result.errors
+
+
 def test_risk_warning_cap_none_for_star(library):
     version, rules = rules_for(library, board="STAR", risk="ST")
     assert rules.risk_warning_buy_daily_cap is None

@@ -73,6 +73,7 @@
           },
           "settlement": "T+1",
           "risk_warning_buy_daily_cap": null,
+          "market_order_allowed": true,
           "notes": []
         },
         {
@@ -135,6 +136,7 @@
           },
           "settlement": "T+1",
           "risk_warning_buy_daily_cap": null,
+          "market_order_allowed": true,
           "notes": []
         },
         {
@@ -199,6 +201,7 @@
           },
           "settlement": "T+1",
           "risk_warning_buy_daily_cap": null,
+          "market_order_allowed": true,
           "notes": []
         },
         {
@@ -263,6 +266,7 @@
           },
           "settlement": "T+1",
           "risk_warning_buy_daily_cap": null,
+          "market_order_allowed": true,
           "notes": [
             "风险警示股票涨跌幅30%：第4.5条未另设比例，待核"
           ]
@@ -327,6 +331,7 @@
           },
           "settlement": "T+1",
           "risk_warning_buy_daily_cap": null,
+          "market_order_allowed": true,
           "notes": []
         },
         {
@@ -391,6 +396,7 @@
           },
           "settlement": "T+1",
           "risk_warning_buy_daily_cap": null,
+          "market_order_allowed": true,
           "notes": []
         }
       ]

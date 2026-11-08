@@ -134,3 +134,14 @@ def list_announcements(conn: sqlite3.Connection, sec_code: str | None = None, li
     sql += " ORDER BY COALESCE(published_at, fetched_at) DESC LIMIT ?"
     args.append(max(1, min(limit, 500)))
     return [dict(r) for r in conn.execute(sql, args).fetchall()]
+
+def list_global_news(conn: sqlite3.Connection, limit: int = 50) -> list[dict]:
+    rows = conn.execute(
+        "SELECT g.id, g.source_id, g.title, g.url, g.summary, g.published_at, g.language, g.keywords, "
+        "g.license_status, v.source_authenticity, v.price_reaction "
+        "FROM global_news g LEFT JOIN news_verification v "
+        "ON v.target_type='global_news' AND v.target_id=g.id "
+        "ORDER BY COALESCE(g.published_at,g.fetched_at) DESC, g.id DESC LIMIT ?",
+        (max(1, min(limit, 200)),),
+    ).fetchall()
+    return [dict(r) for r in rows]

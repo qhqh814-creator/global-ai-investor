@@ -89,7 +89,9 @@
     "subtitle": "真实采集，仅标题/链接/≤100字摘要；公告仅存元数据与原始链接",
     "announcements": "最新公告",
     "news": "财经新闻",
-    "empty": "暂无数据"
+    "empty": "暂无数据",
+    "global": "全球公开信息（出口/订单/合同）",
+    "globalHint": "来自 PR Newswire、Google News、CNBC、MarketWatch、UN 等公开源；只存标题/链接/摘要，未授权，仅供内部研究。价格关联需结合A股标的。"
   },
   "alerts": {
     "title": "警报中心",

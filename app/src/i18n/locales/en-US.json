@@ -89,7 +89,9 @@
     "subtitle": "Real collection: titles/links/≤100-char summaries only; announcements metadata + original links",
     "announcements": "Latest Announcements",
     "news": "Financial News",
-    "empty": "No data"
+    "empty": "No data",
+    "global": "Global public news (export/orders/contracts)",
+    "globalHint": "From public feeds (PR Newswire, Google News, CNBC, MarketWatch, UN); headlines/links only, unlicensed, internal research."
   },
   "alerts": {
     "title": "Alert Center",

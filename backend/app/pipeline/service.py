@@ -1,4 +1,4 @@
-﻿"""End-to-end AI pipeline: collect → analyze → opportunities → weekly simulation.
+"""End-to-end AI pipeline: collect → analyze → opportunities → weekly simulation.
 
 This is the user-facing flow; each stage is explicit and failures are reported
 per stage instead of silently producing numbers.
@@ -13,6 +13,8 @@ from ..ai import make_client
 from ..ai.service import analyze_pending
 from ..analysis.recommendations import list_recommendations, run_recommendations
 from ..content.service import sync_announcements, sync_news
+from ..content.global_news import sync_global_news
+from ..content.verification import verify_content
 from ..trading_plan.service import (
     build_trade_plans,
     latest_weekly_sim,
@@ -26,6 +28,9 @@ TZ = timezone(timedelta(hours=8))
 
 def _counts(conn: sqlite3.Connection) -> dict:
     news = conn.execute("SELECT COUNT(*) AS n, MAX(fetched_at) AS last FROM news_items").fetchone()
+    glob = conn.execute("SELECT COUNT(*) AS n, MAX(fetched_at) AS last FROM global_news").fetchone()
+    verified = conn.execute("SELECT COUNT(*) AS n FROM news_verification").fetchone()["n"]
+    reacted = conn.execute("SELECT COUNT(*) AS n FROM news_verification WHERE price_reaction IN ('REACTED_UP','REACTED_DOWN','MOVED_BEFORE')").fetchone()["n"]
     ann = conn.execute("SELECT COUNT(*) AS n, MAX(fetched_at) AS last FROM announcements").fetchone()
     analyzed = conn.execute("SELECT COUNT(*) AS n FROM ai_analysis").fetchone()["n"]
     pending = conn.execute(
@@ -42,6 +47,8 @@ def _counts(conn: sqlite3.Connection) -> dict:
     failed = conn.execute("SELECT COUNT(*) AS n FROM ai_tasks WHERE status='FAILED'").fetchone()["n"]
     return {
         "news_count": news["n"], "last_news_at": news["last"],
+        "global_news_count": glob["n"], "last_global_at": glob["last"],
+        "verified_count": verified, "price_reacted_count": reacted,
         "announcement_count": ann["n"], "last_announcement_at": ann["last"],
         "analyzed_count": analyzed, "pending_analysis": pending, "failed_tasks": failed,
     }
@@ -74,10 +81,17 @@ def run_pipeline(
         try:
             ann = sync_announcements(conn, days=max(1, min(days, 30)), max_pages=max(1, min(max_pages, 20)))
             news = sync_news(conn)
-            collected = {"announcements": ann, "news": news}
+            glob = sync_global_news(conn)
+            collected = {"announcements": ann, "news": news, "global": glob}
             stages.append({"key": "collect", "status": "ok", "detail": collected})
         except Exception as exc:  # noqa: BLE001
             stages.append({"key": "collect", "status": "error", "detail": str(exc)})
+
+    try:
+        ver = verify_content(conn)
+        stages.append({"key": "verify", "status": "ok", "detail": ver})
+    except Exception as exc:  # noqa: BLE001
+        stages.append({"key": "verify", "status": "error", "detail": str(exc)})
 
     if client is None:
         client = make_client(provider, model)

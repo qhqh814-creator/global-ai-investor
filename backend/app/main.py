@@ -32,7 +32,7 @@ from .ai import (
     make_client,
 )
 from .backtest import get_backtest, run_backtest
-from .content import list_announcements, list_news, sync_announcements, sync_news
+from .content import list_announcements, list_global_news, list_news, sync_announcements, sync_news
 from .klines import sync_daily
 from .pipeline import run_pipeline, status as pipeline_status
 from .paper import get_account, list_orders as paper_orders, list_trades as paper_trades, place_order, reset_account
@@ -207,6 +207,11 @@ def announcements_sync(days: int = 7, max_pages: int = 10) -> dict:
     with get_db() as conn:
         return sync_announcements(conn, days=days, max_pages=max_pages)
 
+
+@app.get("/api/global-news", dependencies=[Depends(require_token)])
+def api_global_news(limit: int = 50) -> dict:
+    with get_db() as conn:
+        return {"items": list_global_news(conn, limit=limit)}
 
 @app.get("/api/announcements", dependencies=[Depends(require_token)])
 def announcements_list(sec_code: str | None = None, limit: int = 50) -> dict:
@@ -703,6 +708,7 @@ def api_weekly_latest() -> dict:
 @app.exception_handler(Exception)
 async def unhandled(_request: Request, exc: Exception) -> JSONResponse:
     return JSONResponse(status_code=500, content={"ok": False, "error": str(exc)})
+
 
 
 

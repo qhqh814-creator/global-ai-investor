@@ -1,4 +1,4 @@
-"""AI analysis service (P3).
+﻿"""AI analysis service (P3).
 
 Pipeline: pending news/announcement -> LLM JSON -> schema + evidence validation
 -> ai_analysis -> alerts (L2-L4). Invalid outputs are recorded as failed tasks
@@ -68,6 +68,19 @@ def _pending_targets(conn: sqlite3.Connection, limit: int) -> list[dict]:
             (limit - len(targets),),
         ).fetchall()
         targets.extend(dict(r) for r in rows2)
+    if len(targets) < limit:
+        rows3 = conn.execute(
+            """
+            SELECT 'global_news' AS target_type, g.id, g.title, g.summary, g.url, g.published_at
+            FROM global_news g
+            LEFT JOIN ai_analysis a ON a.target_type='global_news' AND a.target_id=g.id
+            WHERE a.id IS NULL
+            ORDER BY COALESCE(g.published_at, g.fetched_at) DESC, g.id ASC
+            LIMIT ?
+            """,
+            (limit - len(targets),),
+        ).fetchall()
+        targets.extend(dict(r) for r in rows3)
     return targets
 
 
@@ -271,3 +284,4 @@ def analyze_selected(conn: sqlite3.Connection, client, selected: list[dict], mod
         _task_upsert(conn, target, "DONE", None, model_id)
         analyzed += 1
     return {"pending": len(selected), "analyzed": analyzed, "alerts": alerts, "failures": failures}
+

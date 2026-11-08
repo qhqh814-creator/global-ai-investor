@@ -1,4 +1,4 @@
-from __future__ import annotations
+﻿from __future__ import annotations
 
 import sqlite3
 
@@ -49,9 +49,10 @@ def test_run_pipeline_analyzes_then_creates_simulation():
     }
     result = run_pipeline(conn, collect=False, analyze_limit=1, client=FakeClient(payload))
     keys = [s["key"] for s in result["stages"]]
-    assert keys == ["analyze", "opportunities", "plans", "simulate"]
+    assert keys == ["verify", "analyze", "opportunities", "plans", "simulate"]
     assert all(s["status"] == "ok" for s in result["stages"])
     assert result["analyzed_count"] == 1
     assert result["pending_analysis"] == 0
     assert result["weekly"] is not None
     assert result["weekly"]["sim"]["status"] == "PENDING"
+

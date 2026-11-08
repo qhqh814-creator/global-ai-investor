@@ -1,19 +1,24 @@
 """Global AI Investor V1.0 backend (FastAPI sidecar).
 
-P0 skeleton: health check, status endpoint, SQLite bootstrap.
-Business modules (datasources/rules/analysis/backtest) are added in P1+.
+P1: rule library, trading calendar, fee/order validation endpoints.
+Data collection and AI modules land in P2/P3.
 """
 
 from __future__ import annotations
 
 import json
 import os
+import re
 import sqlite3
-from datetime import datetime, timezone
+from datetime import date, datetime, timezone
 from pathlib import Path
 
-from fastapi import Depends, FastAPI, HTTPException, Request
+from fastapi import Depends, FastAPI, HTTPException, Query, Request
 from fastapi.responses import JSONResponse
+
+from .db.migrate import migrate
+from .rules import get_library
+from .trading_calendar import TradingCalendar
 
 ROOT = Path(os.environ.get("GAI_ROOT", Path(__file__).resolve().parents[2]))
 DATA_DIR = ROOT / "data"
@@ -30,6 +35,7 @@ def now_iso() -> str:
 
 
 def get_db() -> sqlite3.Connection:
+    DB_DIR.mkdir(parents=True, exist_ok=True)
     conn = sqlite3.connect(DB_PATH)
     conn.row_factory = sqlite3.Row
     conn.execute("PRAGMA journal_mode=WAL;")
@@ -37,108 +43,156 @@ def get_db() -> sqlite3.Connection:
     return conn
 
 
-def init_db() -> None:
+def bootstrap() -> None:
     DB_DIR.mkdir(parents=True, exist_ok=True)
     with get_db() as conn:
-        conn.executescript(
-            """
-            CREATE TABLE IF NOT EXISTS schema_migrations (
-                version TEXT PRIMARY KEY,
-                applied_at TEXT NOT NULL,
-                checksum TEXT
-            );
-            CREATE TABLE IF NOT EXISTS app_settings (
-                key TEXT PRIMARY KEY,
-                value_json TEXT NOT NULL,
-                updated_at TEXT NOT NULL
-            );
-            INSERT OR IGNORE INTO schema_migrations(version, applied_at, checksum)
-                VALUES ('0001_init', datetime('now'), 'p0-skeleton');
-            """
-        )
-    with get_db() as conn:
+        migrate(conn)
         conn.execute(
             "INSERT OR REPLACE INTO app_settings(key, value_json, updated_at) VALUES (?, ?, ?)",
             ("app.last_start", json.dumps({"started_at": now_iso()}), now_iso()),
+        )
+        conn.execute(
+            "INSERT OR REPLACE INTO data_sources(source_id, name, kind, base_url, license_status, commercial_ok, latency_class, enabled, config_json, updated_at) "
+            "VALUES (?, ?, ?, ?, ?, ?, ?, 1, ?, ?)",
+            (
+                "szse_calendar",
+                "深圳证券交易所交易日历",
+                "calendar",
+                "https://www.szse.cn/api/report/exchange/onepersistenthour/monthList",
+                "public_page",
+                0,
+                "eod",
+                json.dumps({"note": "官方公开接口，实测可用"}),
+                now_iso(),
+            ),
         )
 
 
 async def require_token(request: Request) -> None:
     if not TOKEN:
         return
-    auth = request.headers.get("Authorization", "")
-    if auth != f"Bearer {TOKEN}":
+    if request.headers.get("Authorization", "") != f"Bearer {TOKEN}":
         raise HTTPException(status_code=401, detail="unauthorized")
 
 
 @app.on_event("startup")
 def on_startup() -> None:
-    init_db()
+    bootstrap()
 
 
 @app.get("/health")
 def health() -> dict:
-    return {
-        "status": "ok",
-        "service": "gai-backend",
-        "version": "0.1.0",
-        "port": PORT,
-        "time": now_iso(),
-    }
+    return {"status": "ok", "service": "gai-backend", "version": "0.1.0", "port": PORT, "time": now_iso()}
 
 
 @app.get("/api/status", dependencies=[Depends(require_token)])
 def status() -> dict:
-    init_db()
     with get_db() as conn:
-        row = conn.execute("SELECT COUNT(*) AS c FROM schema_migrations").fetchone()
-        migrations = int(row["c"]) if row else 0
+        migrations = conn.execute("SELECT COUNT(*) AS c FROM schema_migrations").fetchone()["c"]
+        cal = conn.execute("SELECT COUNT(*) AS c FROM trading_calendar").fetchone()["c"]
+        try:
+            versions = len(get_library().versions)
+        except Exception as exc:  # pragma: no cover - surfaced to UI
+            versions = f"error: {exc}"
     return {
         "ok": True,
         "root": str(ROOT),
         "db": str(DB_PATH),
         "migrations": migrations,
+        "trading_calendar_days": cal,
+        "rule_versions": versions,
         "time": now_iso(),
     }
 
 
 @app.get("/api/dashboard", dependencies=[Depends(require_token)])
 def dashboard() -> dict:
-    """P0: every card is explicitly 'unavailable' with a reason.
-
-    P2 will fill real values with provenance; unavailable entries must stay
-    unavailable rather than showing fabricated numbers.
-    """
     cards = [
-        "sse_index",
-        "szse_index",
-        "chinext_index",
-        "star50",
-        "bse50",
-        "market_overview",
-        "breadth",
-        "limit_counts",
-        "turnover",
-        "good_news",
-        "risk_alerts",
-        "ai_opportunities",
-        "watchlist",
-        "signals",
-        "paper_account",
+        "sse_index", "szse_index", "chinext_index", "star50", "bse50",
+        "market_overview", "breadth", "limit_counts", "turnover",
+        "good_news", "risk_alerts", "ai_opportunities",
+        "watchlist", "signals", "paper_account",
     ]
     return {
         "cards": [
-            {
-                "key": key,
-                "value": None,
-                "status": "unavailable",
-                "reason": "data_source_not_connected",
-                "provenance": None,
-            }
-            for key in cards
+            {"key": k, "value": None, "status": "unavailable", "reason": "data_source_not_connected", "provenance": None}
+            for k in cards
         ],
         "time": now_iso(),
     }
+
+
+@app.get("/api/rules/versions", dependencies=[Depends(require_token)])
+def rule_versions() -> dict:
+    lib = get_library()
+    return {
+        "versions": [
+            {
+                "version_code": v.version_code,
+                "exchange": v.exchange,
+                "doc_no": v.doc_no,
+                "publish_date": v.publish_date.isoformat(),
+                "effective_from": v.effective_from.isoformat(),
+                "effective_to": v.effective_to.isoformat() if v.effective_to else None,
+                "source_url": v.source_url,
+                "boards": sorted(v.boards.keys()),
+                "clauses": [c.model_dump() for c in v.clauses],
+            }
+            for v in lib.versions
+        ]
+    }
+
+
+@app.get("/api/rules/resolve", dependencies=[Depends(require_token)])
+def resolve_rule(
+    exchange: str,
+    board: str,
+    date_str: str = Query(alias="date"),
+    risk_flag: str = "NORMAL",
+    listing_phase: str = "SEASONED",
+) -> dict:
+    try:
+        d = date.fromisoformat(date_str)
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=f"invalid date: {date_str}") from exc
+    try:
+        version, rules = get_library().select(exchange, board, risk_flag, listing_phase, d)  # type: ignore[arg-type]
+    except LookupError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
+    return {
+        "version_code": version.version_code,
+        "doc_no": version.doc_no,
+        "source_url": version.source_url,
+        "effective_from": version.effective_from.isoformat(),
+        "effective_to": version.effective_to.isoformat() if version.effective_to else None,
+        "rules": rules.model_dump(),
+    }
+
+
+@app.get("/api/calendar/{year_month}", dependencies=[Depends(require_token)])
+def calendar_month(year_month: str) -> dict:
+    if not re.fullmatch(r"\d{4}-\d{2}", year_month):
+        raise HTTPException(status_code=422, detail="expected YYYY-MM")
+    year, month = (int(x) for x in year_month.split("-"))
+    with get_db() as conn:
+        cal = TradingCalendar(conn)
+        days = cal.month_days(year, month)
+        coverage = cal.year_coverage(year)
+    return {"month": year_month, "days": days, "coverage": coverage, "source": "szse_calendar"}
+
+
+@app.post("/api/calendar/sync/{year_month}", dependencies=[Depends(require_token)])
+def calendar_sync(year_month: str) -> dict:
+    if not re.fullmatch(r"\d{4}-\d{2}", year_month):
+        raise HTTPException(status_code=422, detail="expected YYYY-MM")
+    year, month = (int(x) for x in year_month.split("-"))
+    try:
+        with get_db() as conn:
+            cal = TradingCalendar(conn)
+            count = cal.sync_month(year, month)
+    except Exception as exc:  # network/parse failures must be explicit
+        raise HTTPException(status_code=502, detail=f"calendar sync failed: {exc}") from exc
+    return {"month": year_month, "synced": count, "source": "szse_calendar"}
 
 
 @app.exception_handler(Exception)

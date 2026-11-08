@@ -1,0 +1,977 @@
+{
+  "version_code": "SSE-2026.07.06",
+  "exchange": "SSE",
+  "doc_no": "上证发〔2026〕41号",
+  "publish_date": "2026-04-24",
+  "effective_from": "2026-07-06",
+  "effective_to": null,
+  "source_url": "https://www.sse.com.cn/lawandrules/sselawsrules2025/trade/universal/c/c_20260424_10816492.shtml",
+  "supersedes": "SSE-2023.08.28",
+  "clauses": [
+    {
+      "clause_no": "3.7",
+      "title": "盘后固定价格交易扩至全部A股及ETF",
+      "status": "EFFECTIVE",
+      "note": "2026-07-06 起"
+    }
+  ],
+  "boards": {
+    "MAIN": {
+      "sets": [
+        {
+          "risk_flag": "NORMAL",
+          "listing_phase": "SEASONED",
+          "price_limit": {
+            "type": "PCT",
+            "up_pct": 0.1,
+            "down_pct": 0.1
+          },
+          "order": {
+            "min_qty": 100,
+            "step": 100,
+            "multiple_required": true,
+            "max_qty": 1000000,
+            "max_qty_market": null,
+            "odd_lot_threshold": 100,
+            "odd_lot_must_one_order": true
+          },
+          "tick_size": 0.01,
+          "price_cage": {
+            "enabled": true,
+            "pct": 0.02,
+            "abs_offset": 0.1,
+            "compare": "WIDER"
+          },
+          "fees": {
+            "stamp_duty": 0.0005,
+            "transfer_fee": 1e-05,
+            "handling_fee": 3.41e-05,
+            "regulatory_fee": 2e-05,
+            "commission_min": 5.0
+          },
+          "sessions": {
+            "open_auction": [
+              "09:15",
+              "09:25"
+            ],
+            "open_auction_cancel_cutoff": "09:20",
+            "continuous": [
+              [
+                "09:30",
+                "11:30"
+              ],
+              [
+                "13:00",
+                "14:57"
+              ]
+            ],
+            "close_auction": [
+              "14:57",
+              "15:00"
+            ],
+            "close_auction_cancel_allowed": false,
+            "after_hours": {
+              "enabled": true,
+              "status": "EFFECTIVE",
+              "order": [
+                [
+                  "09:30",
+                  "11:30"
+                ],
+                [
+                  "13:00",
+                  "15:30"
+                ]
+              ],
+              "trade": [
+                "15:05",
+                "15:30"
+              ],
+              "price": "CLOSE",
+              "min_qty": 100,
+              "step": 100,
+              "max_qty": 1000000
+            }
+          },
+          "settlement": "T+1",
+          "risk_warning_buy_daily_cap": null,
+          "notes": []
+        },
+        {
+          "risk_flag": "NORMAL",
+          "listing_phase": "IPO_DAY1",
+          "price_limit": {
+            "type": "FIRST_DAY_SPECIAL",
+            "first_day_up_pct": 0.44,
+            "first_day_down_pct": 0.36,
+            "first_day_auction_min_ratio": 0.8,
+            "first_day_auction_max_ratio": 1.2,
+            "first_day_continuous_min_ratio": 0.64,
+            "first_day_continuous_max_ratio": 1.44,
+            "base_price_type": "ISSUE_PRICE"
+          },
+          "order": {
+            "min_qty": 100,
+            "step": 100,
+            "multiple_required": true,
+            "max_qty": 1000000,
+            "max_qty_market": null,
+            "odd_lot_threshold": 100,
+            "odd_lot_must_one_order": true
+          },
+          "tick_size": 0.01,
+          "price_cage": {
+            "enabled": true,
+            "pct": 0.02,
+            "abs_offset": 0.1,
+            "compare": "WIDER"
+          },
+          "fees": {
+            "stamp_duty": 0.0005,
+            "transfer_fee": 1e-05,
+            "handling_fee": 3.41e-05,
+            "regulatory_fee": 2e-05,
+            "commission_min": 5.0
+          },
+          "sessions": {
+            "open_auction": [
+              "09:15",
+              "09:25"
+            ],
+            "open_auction_cancel_cutoff": "09:20",
+            "continuous": [
+              [
+                "09:30",
+                "11:30"
+              ],
+              [
+                "13:00",
+                "14:57"
+              ]
+            ],
+            "close_auction": [
+              "14:57",
+              "15:00"
+            ],
+            "close_auction_cancel_allowed": false,
+            "after_hours": {
+              "enabled": true,
+              "status": "EFFECTIVE",
+              "order": [
+                [
+                  "09:30",
+                  "11:30"
+                ],
+                [
+                  "13:00",
+                  "15:30"
+                ]
+              ],
+              "trade": [
+                "15:05",
+                "15:30"
+              ],
+              "price": "CLOSE",
+              "min_qty": 100,
+              "step": 100,
+              "max_qty": 1000000
+            }
+          },
+          "settlement": "T+1",
+          "risk_warning_buy_daily_cap": null,
+          "notes": []
+        },
+        {
+          "risk_flag": "NORMAL",
+          "listing_phase": "IPO_DAY2_5",
+          "price_limit": {
+            "type": "PCT",
+            "up_pct": 0.1,
+            "down_pct": 0.1
+          },
+          "order": {
+            "min_qty": 100,
+            "step": 100,
+            "multiple_required": true,
+            "max_qty": 1000000,
+            "max_qty_market": null,
+            "odd_lot_threshold": 100,
+            "odd_lot_must_one_order": true
+          },
+          "tick_size": 0.01,
+          "price_cage": {
+            "enabled": true,
+            "pct": 0.02,
+            "abs_offset": 0.1,
+            "compare": "WIDER"
+          },
+          "fees": {
+            "stamp_duty": 0.0005,
+            "transfer_fee": 1e-05,
+            "handling_fee": 3.41e-05,
+            "regulatory_fee": 2e-05,
+            "commission_min": 5.0
+          },
+          "sessions": {
+            "open_auction": [
+              "09:15",
+              "09:25"
+            ],
+            "open_auction_cancel_cutoff": "09:20",
+            "continuous": [
+              [
+                "09:30",
+                "11:30"
+              ],
+              [
+                "13:00",
+                "14:57"
+              ]
+            ],
+            "close_auction": [
+              "14:57",
+              "15:00"
+            ],
+            "close_auction_cancel_allowed": false,
+            "after_hours": {
+              "enabled": true,
+              "status": "EFFECTIVE",
+              "order": [
+                [
+                  "09:30",
+                  "11:30"
+                ],
+                [
+                  "13:00",
+                  "15:30"
+                ]
+              ],
+              "trade": [
+                "15:05",
+                "15:30"
+              ],
+              "price": "CLOSE",
+              "min_qty": 100,
+              "step": 100,
+              "max_qty": 1000000
+            }
+          },
+          "settlement": "T+1",
+          "risk_warning_buy_daily_cap": null,
+          "notes": []
+        },
+        {
+          "risk_flag": "ST",
+          "listing_phase": "SEASONED",
+          "price_limit": {
+            "type": "PCT",
+            "up_pct": 0.1,
+            "down_pct": 0.1
+          },
+          "order": {
+            "min_qty": 100,
+            "step": 100,
+            "multiple_required": true,
+            "max_qty": 1000000,
+            "max_qty_market": null,
+            "odd_lot_threshold": 100,
+            "odd_lot_must_one_order": true
+          },
+          "tick_size": 0.01,
+          "price_cage": {
+            "enabled": true,
+            "pct": 0.02,
+            "abs_offset": 0.1,
+            "compare": "WIDER"
+          },
+          "fees": {
+            "stamp_duty": 0.0005,
+            "transfer_fee": 1e-05,
+            "handling_fee": 3.41e-05,
+            "regulatory_fee": 2e-05,
+            "commission_min": 5.0
+          },
+          "sessions": {
+            "open_auction": [
+              "09:15",
+              "09:25"
+            ],
+            "open_auction_cancel_cutoff": "09:20",
+            "continuous": [
+              [
+                "09:30",
+                "11:30"
+              ],
+              [
+                "13:00",
+                "14:57"
+              ]
+            ],
+            "close_auction": [
+              "14:57",
+              "15:00"
+            ],
+            "close_auction_cancel_allowed": false,
+            "after_hours": {
+              "enabled": true,
+              "status": "EFFECTIVE",
+              "order": [
+                [
+                  "09:30",
+                  "11:30"
+                ],
+                [
+                  "13:00",
+                  "15:30"
+                ]
+              ],
+              "trade": [
+                "15:05",
+                "15:30"
+              ],
+              "price": "CLOSE",
+              "min_qty": 100,
+              "step": 100,
+              "max_qty": 1000000
+            }
+          },
+          "settlement": "T+1",
+          "risk_warning_buy_daily_cap": 500000,
+          "notes": []
+        },
+        {
+          "risk_flag": "DELISTING",
+          "listing_phase": "IPO_DAY1",
+          "price_limit": {
+            "type": "NONE"
+          },
+          "order": {
+            "min_qty": 100,
+            "step": 100,
+            "multiple_required": true,
+            "max_qty": 1000000,
+            "max_qty_market": null,
+            "odd_lot_threshold": 100,
+            "odd_lot_must_one_order": true
+          },
+          "tick_size": 0.01,
+          "price_cage": {
+            "enabled": true,
+            "pct": 0.02,
+            "abs_offset": 0.1,
+            "compare": "WIDER"
+          },
+          "fees": {
+            "stamp_duty": 0.0005,
+            "transfer_fee": 1e-05,
+            "handling_fee": 3.41e-05,
+            "regulatory_fee": 2e-05,
+            "commission_min": 5.0
+          },
+          "sessions": {
+            "open_auction": [
+              "09:15",
+              "09:25"
+            ],
+            "open_auction_cancel_cutoff": "09:20",
+            "continuous": [
+              [
+                "09:30",
+                "11:30"
+              ],
+              [
+                "13:00",
+                "14:57"
+              ]
+            ],
+            "close_auction": [
+              "14:57",
+              "15:00"
+            ],
+            "close_auction_cancel_allowed": false,
+            "after_hours": {
+              "enabled": true,
+              "status": "EFFECTIVE",
+              "order": [
+                [
+                  "09:30",
+                  "11:30"
+                ],
+                [
+                  "13:00",
+                  "15:30"
+                ]
+              ],
+              "trade": [
+                "15:05",
+                "15:30"
+              ],
+              "price": "CLOSE",
+              "min_qty": 100,
+              "step": 100,
+              "max_qty": 1000000
+            }
+          },
+          "settlement": "T+1",
+          "risk_warning_buy_daily_cap": null,
+          "notes": []
+        },
+        {
+          "risk_flag": "DELISTING",
+          "listing_phase": "SEASONED",
+          "price_limit": {
+            "type": "PCT",
+            "up_pct": 0.1,
+            "down_pct": 0.1
+          },
+          "order": {
+            "min_qty": 100,
+            "step": 100,
+            "multiple_required": true,
+            "max_qty": 1000000,
+            "max_qty_market": null,
+            "odd_lot_threshold": 100,
+            "odd_lot_must_one_order": true
+          },
+          "tick_size": 0.01,
+          "price_cage": {
+            "enabled": true,
+            "pct": 0.02,
+            "abs_offset": 0.1,
+            "compare": "WIDER"
+          },
+          "fees": {
+            "stamp_duty": 0.0005,
+            "transfer_fee": 1e-05,
+            "handling_fee": 3.41e-05,
+            "regulatory_fee": 2e-05,
+            "commission_min": 5.0
+          },
+          "sessions": {
+            "open_auction": [
+              "09:15",
+              "09:25"
+            ],
+            "open_auction_cancel_cutoff": "09:20",
+            "continuous": [
+              [
+                "09:30",
+                "11:30"
+              ],
+              [
+                "13:00",
+                "14:57"
+              ]
+            ],
+            "close_auction": [
+              "14:57",
+              "15:00"
+            ],
+            "close_auction_cancel_allowed": false,
+            "after_hours": {
+              "enabled": true,
+              "status": "EFFECTIVE",
+              "order": [
+                [
+                  "09:30",
+                  "11:30"
+                ],
+                [
+                  "13:00",
+                  "15:30"
+                ]
+              ],
+              "trade": [
+                "15:05",
+                "15:30"
+              ],
+              "price": "CLOSE",
+              "min_qty": 100,
+              "step": 100,
+              "max_qty": 1000000
+            }
+          },
+          "settlement": "T+1",
+          "risk_warning_buy_daily_cap": null,
+          "notes": []
+        }
+      ]
+    },
+    "STAR": {
+      "sets": [
+        {
+          "risk_flag": "NORMAL",
+          "listing_phase": "SEASONED",
+          "price_limit": {
+            "type": "PCT",
+            "up_pct": 0.2,
+            "down_pct": 0.2
+          },
+          "order": {
+            "min_qty": 200,
+            "step": 1,
+            "multiple_required": false,
+            "max_qty": 100000,
+            "max_qty_market": 50000,
+            "odd_lot_threshold": 200,
+            "odd_lot_must_one_order": true
+          },
+          "tick_size": 0.01,
+          "price_cage": {
+            "enabled": true,
+            "pct": 0.02,
+            "abs_offset": null,
+            "compare": "WIDER"
+          },
+          "fees": {
+            "stamp_duty": 0.0005,
+            "transfer_fee": 1e-05,
+            "handling_fee": 3.41e-05,
+            "regulatory_fee": 2e-05,
+            "commission_min": 5.0
+          },
+          "sessions": {
+            "open_auction": [
+              "09:15",
+              "09:25"
+            ],
+            "open_auction_cancel_cutoff": "09:20",
+            "continuous": [
+              [
+                "09:30",
+                "11:30"
+              ],
+              [
+                "13:00",
+                "14:57"
+              ]
+            ],
+            "close_auction": [
+              "14:57",
+              "15:00"
+            ],
+            "close_auction_cancel_allowed": false,
+            "after_hours": {
+              "enabled": true,
+              "status": "EFFECTIVE",
+              "order": [
+                [
+                  "09:30",
+                  "11:30"
+                ],
+                [
+                  "13:00",
+                  "15:30"
+                ]
+              ],
+              "trade": [
+                "15:05",
+                "15:30"
+              ],
+              "price": "CLOSE",
+              "min_qty": 200,
+              "step": 1,
+              "max_qty": 1000000
+            }
+          },
+          "settlement": "T+1",
+          "risk_warning_buy_daily_cap": null,
+          "notes": []
+        },
+        {
+          "risk_flag": "NORMAL",
+          "listing_phase": "IPO_DAY1",
+          "price_limit": {
+            "type": "NONE"
+          },
+          "order": {
+            "min_qty": 200,
+            "step": 1,
+            "multiple_required": false,
+            "max_qty": 100000,
+            "max_qty_market": 50000,
+            "odd_lot_threshold": 200,
+            "odd_lot_must_one_order": true
+          },
+          "tick_size": 0.01,
+          "price_cage": {
+            "enabled": true,
+            "pct": 0.02,
+            "abs_offset": null,
+            "compare": "WIDER"
+          },
+          "fees": {
+            "stamp_duty": 0.0005,
+            "transfer_fee": 1e-05,
+            "handling_fee": 3.41e-05,
+            "regulatory_fee": 2e-05,
+            "commission_min": 5.0
+          },
+          "sessions": {
+            "open_auction": [
+              "09:15",
+              "09:25"
+            ],
+            "open_auction_cancel_cutoff": "09:20",
+            "continuous": [
+              [
+                "09:30",
+                "11:30"
+              ],
+              [
+                "13:00",
+                "14:57"
+              ]
+            ],
+            "close_auction": [
+              "14:57",
+              "15:00"
+            ],
+            "close_auction_cancel_allowed": false,
+            "after_hours": {
+              "enabled": true,
+              "status": "EFFECTIVE",
+              "order": [
+                [
+                  "09:30",
+                  "11:30"
+                ],
+                [
+                  "13:00",
+                  "15:30"
+                ]
+              ],
+              "trade": [
+                "15:05",
+                "15:30"
+              ],
+              "price": "CLOSE",
+              "min_qty": 200,
+              "step": 1,
+              "max_qty": 1000000
+            }
+          },
+          "settlement": "T+1",
+          "risk_warning_buy_daily_cap": null,
+          "notes": []
+        },
+        {
+          "risk_flag": "NORMAL",
+          "listing_phase": "IPO_DAY2_5",
+          "price_limit": {
+            "type": "NONE"
+          },
+          "order": {
+            "min_qty": 200,
+            "step": 1,
+            "multiple_required": false,
+            "max_qty": 100000,
+            "max_qty_market": 50000,
+            "odd_lot_threshold": 200,
+            "odd_lot_must_one_order": true
+          },
+          "tick_size": 0.01,
+          "price_cage": {
+            "enabled": true,
+            "pct": 0.02,
+            "abs_offset": null,
+            "compare": "WIDER"
+          },
+          "fees": {
+            "stamp_duty": 0.0005,
+            "transfer_fee": 1e-05,
+            "handling_fee": 3.41e-05,
+            "regulatory_fee": 2e-05,
+            "commission_min": 5.0
+          },
+          "sessions": {
+            "open_auction": [
+              "09:15",
+              "09:25"
+            ],
+            "open_auction_cancel_cutoff": "09:20",
+            "continuous": [
+              [
+                "09:30",
+                "11:30"
+              ],
+              [
+                "13:00",
+                "14:57"
+              ]
+            ],
+            "close_auction": [
+              "14:57",
+              "15:00"
+            ],
+            "close_auction_cancel_allowed": false,
+            "after_hours": {
+              "enabled": true,
+              "status": "EFFECTIVE",
+              "order": [
+                [
+                  "09:30",
+                  "11:30"
+                ],
+                [
+                  "13:00",
+                  "15:30"
+                ]
+              ],
+              "trade": [
+                "15:05",
+                "15:30"
+              ],
+              "price": "CLOSE",
+              "min_qty": 200,
+              "step": 1,
+              "max_qty": 1000000
+            }
+          },
+          "settlement": "T+1",
+          "risk_warning_buy_daily_cap": null,
+          "notes": []
+        },
+        {
+          "risk_flag": "ST",
+          "listing_phase": "SEASONED",
+          "price_limit": {
+            "type": "PCT",
+            "up_pct": 0.2,
+            "down_pct": 0.2
+          },
+          "order": {
+            "min_qty": 200,
+            "step": 1,
+            "multiple_required": false,
+            "max_qty": 100000,
+            "max_qty_market": 50000,
+            "odd_lot_threshold": 200,
+            "odd_lot_must_one_order": true
+          },
+          "tick_size": 0.01,
+          "price_cage": {
+            "enabled": true,
+            "pct": 0.02,
+            "abs_offset": null,
+            "compare": "WIDER"
+          },
+          "fees": {
+            "stamp_duty": 0.0005,
+            "transfer_fee": 1e-05,
+            "handling_fee": 3.41e-05,
+            "regulatory_fee": 2e-05,
+            "commission_min": 5.0
+          },
+          "sessions": {
+            "open_auction": [
+              "09:15",
+              "09:25"
+            ],
+            "open_auction_cancel_cutoff": "09:20",
+            "continuous": [
+              [
+                "09:30",
+                "11:30"
+              ],
+              [
+                "13:00",
+                "14:57"
+              ]
+            ],
+            "close_auction": [
+              "14:57",
+              "15:00"
+            ],
+            "close_auction_cancel_allowed": false,
+            "after_hours": {
+              "enabled": true,
+              "status": "EFFECTIVE",
+              "order": [
+                [
+                  "09:30",
+                  "11:30"
+                ],
+                [
+                  "13:00",
+                  "15:30"
+                ]
+              ],
+              "trade": [
+                "15:05",
+                "15:30"
+              ],
+              "price": "CLOSE",
+              "min_qty": 200,
+              "step": 1,
+              "max_qty": 1000000
+            }
+          },
+          "settlement": "T+1",
+          "risk_warning_buy_daily_cap": null,
+          "notes": [
+            "科创板风险警示股票不进入风险警示板，不适用50万股限制"
+          ]
+        },
+        {
+          "risk_flag": "DELISTING",
+          "listing_phase": "IPO_DAY1",
+          "price_limit": {
+            "type": "NONE"
+          },
+          "order": {
+            "min_qty": 200,
+            "step": 1,
+            "multiple_required": false,
+            "max_qty": 100000,
+            "max_qty_market": 50000,
+            "odd_lot_threshold": 200,
+            "odd_lot_must_one_order": true
+          },
+          "tick_size": 0.01,
+          "price_cage": {
+            "enabled": true,
+            "pct": 0.02,
+            "abs_offset": null,
+            "compare": "WIDER"
+          },
+          "fees": {
+            "stamp_duty": 0.0005,
+            "transfer_fee": 1e-05,
+            "handling_fee": 3.41e-05,
+            "regulatory_fee": 2e-05,
+            "commission_min": 5.0
+          },
+          "sessions": {
+            "open_auction": [
+              "09:15",
+              "09:25"
+            ],
+            "open_auction_cancel_cutoff": "09:20",
+            "continuous": [
+              [
+                "09:30",
+                "11:30"
+              ],
+              [
+                "13:00",
+                "14:57"
+              ]
+            ],
+            "close_auction": [
+              "14:57",
+              "15:00"
+            ],
+            "close_auction_cancel_allowed": false,
+            "after_hours": {
+              "enabled": true,
+              "status": "EFFECTIVE",
+              "order": [
+                [
+                  "09:30",
+                  "11:30"
+                ],
+                [
+                  "13:00",
+                  "15:30"
+                ]
+              ],
+              "trade": [
+                "15:05",
+                "15:30"
+              ],
+              "price": "CLOSE",
+              "min_qty": 200,
+              "step": 1,
+              "max_qty": 1000000
+            }
+          },
+          "settlement": "T+1",
+          "risk_warning_buy_daily_cap": null,
+          "notes": []
+        },
+        {
+          "risk_flag": "DELISTING",
+          "listing_phase": "SEASONED",
+          "price_limit": {
+            "type": "PCT",
+            "up_pct": 0.2,
+            "down_pct": 0.2
+          },
+          "order": {
+            "min_qty": 200,
+            "step": 1,
+            "multiple_required": false,
+            "max_qty": 100000,
+            "max_qty_market": 50000,
+            "odd_lot_threshold": 200,
+            "odd_lot_must_one_order": true
+          },
+          "tick_size": 0.01,
+          "price_cage": {
+            "enabled": true,
+            "pct": 0.02,
+            "abs_offset": null,
+            "compare": "WIDER"
+          },
+          "fees": {
+            "stamp_duty": 0.0005,
+            "transfer_fee": 1e-05,
+            "handling_fee": 3.41e-05,
+            "regulatory_fee": 2e-05,
+            "commission_min": 5.0
+          },
+          "sessions": {
+            "open_auction": [
+              "09:15",
+              "09:25"
+            ],
+            "open_auction_cancel_cutoff": "09:20",
+            "continuous": [
+              [
+                "09:30",
+                "11:30"
+              ],
+              [
+                "13:00",
+                "14:57"
+              ]
+            ],
+            "close_auction": [
+              "14:57",
+              "15:00"
+            ],
+            "close_auction_cancel_allowed": false,
+            "after_hours": {
+              "enabled": true,
+              "status": "EFFECTIVE",
+              "order": [
+                [
+                  "09:30",
+                  "11:30"
+                ],
+                [
+                  "13:00",
+                  "15:30"
+                ]
+              ],
+              "trade": [
+                "15:05",
+                "15:30"
+              ],
+              "price": "CLOSE",
+              "min_qty": 200,
+              "step": 1,
+              "max_qty": 1000000
+            }
+          },
+          "settlement": "T+1",
+          "risk_warning_buy_daily_cap": null,
+          "notes": [
+            "退市整理期次日起20%：推断，待核"
+          ]
+        }
+      ]
+    }
+  }
+}

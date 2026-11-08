@@ -1,4 +1,4 @@
-[project]
+﻿[project]
 name = "global-ai-investor-backend"
 version = "0.1.0"
 description = "Global AI Investor V1.0 backend sidecar (China A-share)"
@@ -26,7 +26,9 @@ dev = ["pytest>=9.2", "pytest-asyncio>=1.4", "pyinstaller>=6.22"]
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
 
 [tool.ruff]
 line-length = 120
 target-version = "py312"
+

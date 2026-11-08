@@ -4,10 +4,11 @@ Windows 独立桌面应用：A股真实数据采集 + 配置化交易规则引�
 
 ## 状态
 
-- 阶段：**P0 完成 → 准备进入 P1**
+- 阶段：**P1 进行中（核心规则引擎已完成）**
 - 基线文档：已完成（docs/00–09，v1.0）
 - 环境：Node v22.23.4（tools\node 便携版）、npm 10.9.9、Python 3.12 venv（50 个依赖包）
-- 已验证：`npm run build` 通过；Electron 生产包启动并加载驾驶舱（15 张卡片显示“数据不可用”）；Python sidecar `/health`、`/api/status`、`/api/dashboard` 正常，未带 Token 返回 401
+- P0 已验证：`npm run build` 通过；Electron 生产包启动并加载驾驶舱（15 张卡片显示“数据不可用”）；Python sidecar `/health`、`/api/status`、`/api/dashboard` 正常，未带 Token 返回 401
+- P1 已完成：10 个规则版本（2023/2026 现行版）、加载器/选择器、费用计算、申报校验器、深交所交易日历（2026 全年已同步）、42 项测试全部通过
 - 注意：某些终端环境会设置 `ELECTRON_RUN_AS_NODE=1`，会让 Electron 以 Node 模式启动而报 `app.isPackaged` 未定义。`scripts/dev.ps1` 与 `npm run dev:electron` 已清除该变量；直接双击安装包运行时不受影响。
 
 ## 文档索引

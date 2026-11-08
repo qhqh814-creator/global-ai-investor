@@ -1,4 +1,4 @@
-﻿"""Local paper-trading account (P5).
+"""Local paper-trading account (P5).
 
 Uses the same rule engine as the real backtest: quantity/tick/price-limit/
 T+1/ST-cap checks all come from the effective rule set. Fills are simplified

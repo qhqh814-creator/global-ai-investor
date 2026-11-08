@@ -1,4 +1,4 @@
-﻿"""AI analysis service (P3).
+"""AI analysis service (P3).
 
 Pipeline: pending news/announcement -> LLM JSON -> schema + evidence validation
 -> ai_analysis -> alerts (L2-L4). Invalid outputs are recorded as failed tasks

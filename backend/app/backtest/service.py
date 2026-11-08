@@ -1,4 +1,4 @@
-﻿"""Historical backtest engine (P5).
+"""Historical backtest engine (P5).
 
 Rule-version aware: fees/limits/lot sizes are resolved per trade date from the
 rule library. Daily bars only; documented simplifications:

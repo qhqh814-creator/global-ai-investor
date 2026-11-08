@@ -73,3 +73,10 @@ F:\GlobalAIInvestor
 
 
 
+
+## 安装包与验收
+
+- 安装包：`release\GlobalAIInvestor-Setup-0.1.0.exe`（118.8MB）
+- SHA256：`F75960A32DC94D3B2DCEE9B47B1DD8B1B88B1102D20AE1A554B9F7E56FBC117A`
+- 验收报告：`docs\10-验收报告-v1.0.md`（15 项交付目标矩阵、已知限制与例外）
+- 已实测：静默安装 → 启动（窗口/sidecar/数据目录）→ 全新数据“不可用”状态 → 卸载保留 F 盘数据

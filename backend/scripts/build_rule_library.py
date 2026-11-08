@@ -1,4 +1,4 @@
-﻿"""Build the versioned A-share rule library (data files, P1).
+"""Build the versioned A-share rule library (data files, P1).
 
 This script only SEEDS the JSON rule files; runtime reads the JSON files via
 app.rules.loader. Values marked "待核" must be confirmed against the official

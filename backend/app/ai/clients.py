@@ -1,4 +1,4 @@
-﻿"""AI clients (P3): local Ollama (experiment) and DeepSeek (formal stage).
+"""AI clients (P3): local Ollama (experiment) and DeepSeek (formal stage).
 
 Both return raw JSON text; the service validates it against AnalysisResult.
 API keys are read from environment or the local settings store (never logged).

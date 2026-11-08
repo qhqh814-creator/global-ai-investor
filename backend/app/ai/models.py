@@ -1,4 +1,4 @@
-﻿"""AI analysis domain models (P3)."""
+"""AI analysis domain models (P3)."""
 
 from __future__ import annotations
 

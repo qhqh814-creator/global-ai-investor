@@ -42,6 +42,7 @@ from .workers import run_job_now, start_scheduler, stop_scheduler
 from .rules import get_library
 from .rules.store import list_versions as db_rule_versions, stats as db_rule_stats, sync_library
 from .securities import list_securities, stats as securities_stats, upsert_securities
+from .securities.fallback import ensure_data_source, populate_from_quotes
 from .trading_calendar import TradingCalendar
 
 ROOT = Path(os.environ.get("GAI_ROOT", Path(__file__).resolve().parents[2]))
@@ -154,6 +155,22 @@ def quotes_sync() -> dict:
     """
     with get_db() as conn:
         return sync_quotes(conn)
+
+
+@app.post("/api/securities/backfill/{exchange}", dependencies=[Depends(require_token)])
+def api_securities_backfill(exchange: str) -> dict:
+    """Populate missing securities from the latest quote snapshot (third-party source).
+
+    Every row is tagged `eastmoney_quote` / unlicensed; used when an official
+    exchange list endpoint is unavailable (currently SZSE WAF blocking).
+    """
+    exchange = exchange.upper()
+    if exchange not in ("SSE", "SZSE", "BSE"):
+        raise HTTPException(status_code=422, detail="exchange must be SSE/SZSE/BSE")
+    with get_db() as conn:
+        ensure_data_source(conn)
+        result = populate_from_quotes(conn, exchange)
+        return {**result, "stats": securities_stats(conn)}
 
 
 @app.post("/api/news/sync", dependencies=[Depends(require_token)])
@@ -282,14 +299,25 @@ def api_securities_sync(exchange: str, max_pages: int | None = None) -> dict:
     SZSE requires ~146 pages (~1-2 min) and accepts max_pages for partial syncs.
     """
     exchange = exchange.upper()
-    if exchange == "SSE":
-        records = fetch_sse()
-    elif exchange == "SZSE":
-        records = fetch_szse(max_pages=max_pages)
-    elif exchange == "BSE":
-        records = fetch_bse()
-    else:
-        raise HTTPException(status_code=422, detail="exchange must be SSE/SZSE/BSE")
+    try:
+        if exchange == "SSE":
+            records = fetch_sse()
+        elif exchange == "SZSE":
+            records = fetch_szse(max_pages=max_pages)
+        elif exchange == "BSE":
+            records = fetch_bse()
+        else:
+            raise HTTPException(status_code=422, detail="exchange must be SSE/SZSE/BSE")
+    except HTTPException:
+        raise
+    except Exception as exc:  # noqa: BLE001 - official SZSE list is WAF-blocked sometimes
+        if exchange != "SZSE":
+            raise HTTPException(status_code=502, detail=f"securities sync failed: {exc}") from exc
+        with get_db() as conn:
+            ensure_data_source(conn)
+            fallback = populate_from_quotes(conn, "SZSE")
+            summary = securities_stats(conn)
+        return {"exchange": exchange, "fallback": True, "official_error": str(exc), **fallback, "stats": summary}
     with get_db() as conn:
         count = upsert_securities(conn, records)
         summary = securities_stats(conn)
@@ -562,6 +590,8 @@ def api_accuracy() -> dict:
 @app.exception_handler(Exception)
 async def unhandled(_request: Request, exc: Exception) -> JSONResponse:
     return JSONResponse(status_code=500, content={"ok": False, "error": str(exc)})
+
+
 
 
 

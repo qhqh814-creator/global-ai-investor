@@ -1,4 +1,4 @@
-﻿"""Rule library domain models (P1).
+"""Rule library domain models (P1).
 
 All trading rules are data, never hard-coded. Missing rules raise RuleNotFound
 instead of silently falling back to a default (e.g. 10%).

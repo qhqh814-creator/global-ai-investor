@@ -125,3 +125,25 @@ def test_list_filter():
     items = list_securities(conn, exchange="SZSE", board="CHINEXT")
     assert len(items) == 1 and items[0]["code"] == "300001"
     assert len(list_securities(conn, exchange="SSE")) == 2
+
+def test_fallback_populates_from_quotes():
+    conn = make_db()
+    conn.execute(
+        """
+        INSERT INTO stock_quotes(code, name, exchange, board, last, change_pct, prev_close, amount,
+            quote_time, source_id, quote_kind, is_realtime, license_status, commercial_ok, fetched_at)
+        VALUES ('000001', '平安银行', 'SZSE', 'MAIN', 10.0, 1.0, 9.9, 1e8, '2026-11-06T15:00:00+08:00',
+                'eastmoney_quote', 'snapshot_unknown', 0, 'unlicensed_third_party', 0, '2026-11-06T15:01:00+08:00')
+        """
+    )
+    conn.commit()
+    from backend.app.securities.fallback import ensure_data_source, populate_from_quotes
+
+    ensure_data_source(conn)
+    result = populate_from_quotes(conn, "SZSE")
+    assert result["upserted"] == 1
+    row = conn.execute("SELECT source_id, name_zh FROM securities WHERE code='000001'").fetchone()
+    assert row["source_id"] == "eastmoney_quote"
+    src = conn.execute("SELECT license_status, commercial_ok FROM data_sources WHERE source_id='eastmoney_quote'").fetchone()
+    assert src["license_status"] == "unlicensed_third_party"
+    assert src["commercial_ok"] == 0

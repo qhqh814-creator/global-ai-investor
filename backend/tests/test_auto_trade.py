@@ -35,7 +35,7 @@ def make_db() -> sqlite3.Connection:
 
 def test_auto_buy_ready_places_order():
     conn = make_db()
-    result = auto_buy_ready(conn)
+    result = auto_buy_ready(conn, refresh=False)
     assert result["placed"] == 1
     pos = conn.execute("SELECT qty,avg_cost FROM sim_positions WHERE code='600000'").fetchone()
     assert pos["qty"] == 100
@@ -44,7 +44,7 @@ def test_auto_buy_ready_places_order():
 
 def test_risk_check_stop_loss_sells_sellable_position():
     conn = make_db()
-    auto_buy_ready(conn)
+    auto_buy_ready(conn, refresh=False)
     # make it sellable next day and drop price below -8%
     with conn:
         conn.execute("UPDATE sim_positions SET buy_date='2026-11-05', sellable_qty=100 WHERE code='600000'")
@@ -56,7 +56,7 @@ def test_risk_check_stop_loss_sells_sellable_position():
 
 def test_risk_check_negative_news_sells_position():
     conn = make_db()
-    auto_buy_ready(conn)
+    auto_buy_ready(conn, refresh=False)
     with conn:
         conn.execute("UPDATE sim_positions SET buy_date='2026-11-05', sellable_qty=100 WHERE code='600000'")
         conn.execute(
@@ -81,7 +81,7 @@ def test_risk_check_negative_news_sells_position():
 
 def test_risk_check_market_crash_sells_all():
     conn = make_db()
-    auto_buy_ready(conn)
+    auto_buy_ready(conn, refresh=False)
     with conn:
         conn.execute("UPDATE sim_positions SET buy_date='2026-11-05', sellable_qty=100 WHERE code='600000'")
         conn.execute(

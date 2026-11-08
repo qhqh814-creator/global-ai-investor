@@ -15,7 +15,7 @@ from datetime import datetime, timezone, timedelta
 
 from ..analysis.recommendations import list_recommendations
 from ..paper.service import place_order
-from ..trading_plan.service import list_trade_plans, market_regime
+from ..trading_plan.service import build_trade_plans, list_trade_plans, market_regime
 
 TZ = timezone(timedelta(hours=8))
 STOP_LOSS = -0.08
@@ -40,8 +40,17 @@ def _alert(conn: sqlite3.Connection, level: str, title: str, summary: str, code:
         )
 
 
-def auto_buy_ready(conn: sqlite3.Connection) -> dict:
-    """Buy READY plans not already held. Market-weak plans are WATCH and skipped."""
+def auto_buy_ready(conn: sqlite3.Connection, refresh: bool = True) -> dict:
+    """Buy READY plans not already held. Market-weak plans are WATCH and skipped.
+
+    refresh=True rebuilds plans with the latest quotes/breadth at 09:35, so a
+    pre-market WATCH list does not block buying after the market turns strong.
+    """
+    if refresh:
+        try:
+            build_trade_plans(conn, model_id="auto:09:35")
+        except Exception:  # noqa: BLE001 - keep existing plans if refresh fails
+            pass
     placed = 0
     rejected = 0
     for plan in list_trade_plans(conn, limit=50):

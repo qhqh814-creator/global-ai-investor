@@ -18,6 +18,7 @@ from fastapi.responses import JSONResponse
 
 from .datasources.securities_lists import fetch_bse, fetch_sse, fetch_szse
 from .db.migrate import migrate
+from .content import list_announcements, list_news, sync_announcements, sync_news
 from .quotes import get_dashboard, sync_quotes
 from .rules import get_library
 from .rules.store import list_versions as db_rule_versions, stats as db_rule_stats, sync_library
@@ -125,6 +126,30 @@ def quotes_sync() -> dict:
     """
     with get_db() as conn:
         return sync_quotes(conn)
+
+
+@app.post("/api/news/sync", dependencies=[Depends(require_token)])
+def news_sync() -> dict:
+    with get_db() as conn:
+        return sync_news(conn)
+
+
+@app.get("/api/news", dependencies=[Depends(require_token)])
+def news_list(limit: int = 50) -> dict:
+    with get_db() as conn:
+        return {"items": list_news(conn, limit=limit)}
+
+
+@app.post("/api/announcements/sync", dependencies=[Depends(require_token)])
+def announcements_sync(days: int = 7, max_pages: int = 10) -> dict:
+    with get_db() as conn:
+        return sync_announcements(conn, days=days, max_pages=max_pages)
+
+
+@app.get("/api/announcements", dependencies=[Depends(require_token)])
+def announcements_list(sec_code: str | None = None, limit: int = 50) -> dict:
+    with get_db() as conn:
+        return {"items": list_announcements(conn, sec_code=sec_code, limit=limit)}
 
 
 @app.get("/api/rules/versions", dependencies=[Depends(require_token)])

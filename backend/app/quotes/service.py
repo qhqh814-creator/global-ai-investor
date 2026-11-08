@@ -20,6 +20,7 @@ from ..datasources.quote_eastmoney import (
     fetch_all_stocks,
     fetch_indices,
 )
+from ..datasources.quote_tencent import fetch_index_quotes as fetch_tencent_indices
 from ..rules import get_library
 from ..rules.fees import limit_down_price, limit_up_price
 
@@ -40,14 +41,14 @@ def now_iso() -> str:
     return datetime.now(TZ).isoformat(timespec="seconds")
 
 
-def provenance(quote_time: str | None, fetched_at: str) -> dict:
+def provenance(source_ids: list[str], quote_time: str | None, fetched_at: str, license_status: str = LICENSE_STATUS) -> dict:
     return {
-        "sourceIds": [SOURCE_ID],
+        "sourceIds": source_ids,
         "quoteTime": quote_time,
         "fetchedAt": fetched_at,
         "isRealtime": False,
         "kind": QUOTE_KIND,
-        "licenseStatus": LICENSE_STATUS,
+        "licenseStatus": license_status,
         "commercialOk": COMMERCIAL_OK,
     }
 
@@ -140,6 +141,7 @@ def sync_quotes(
     conn: sqlite3.Connection,
     fetch_indices_fn=fetch_indices,
     fetch_stocks_fn=fetch_all_stocks,
+    fetch_indices_fallback_fn=fetch_tencent_indices,
 ) -> dict:
     fetched_at = now_iso()
     errors: list[str] = []
@@ -148,7 +150,13 @@ def sync_quotes(
     try:
         indices = fetch_indices_fn()
     except Exception as exc:  # noqa: BLE001
-        errors.append(f"indices: {exc}")
+        errors.append(f"indices(eastmoney): {exc}")
+    if not indices:
+        try:
+            indices = fetch_indices_fallback_fn()
+            errors.append("indices fallback: tencent_quote used")
+        except Exception as exc:  # noqa: BLE001
+            errors.append(f"indices(fallback): {exc}")
     try:
         stocks = fetch_stocks_fn()
     except Exception as exc:  # noqa: BLE001
@@ -268,7 +276,7 @@ def get_dashboard(conn: sqlite3.Connection) -> dict:
             "value": value,
             "status": "available",
             "reason": None,
-            "provenance": provenance(q["quote_time"], q["fetched_at"]),
+            "provenance": provenance([q["source_id"]], q["quote_time"], q["fetched_at"], q["license_status"]),
         }
 
     for key, code in [
@@ -283,21 +291,21 @@ def get_dashboard(conn: sqlite3.Connection) -> dict:
     quote_count = conn.execute("SELECT COUNT(*) AS n FROM stock_quotes").fetchone()["n"]
     if quote_count:
         latest_stock = conn.execute(
-            "SELECT quote_time, fetched_at FROM stock_quotes ORDER BY fetched_at DESC LIMIT 1"
+            "SELECT quote_time, fetched_at, source_id, license_status FROM stock_quotes ORDER BY fetched_at DESC LIMIT 1"
         ).fetchone()
         cards.append({
             "key": "dashboard.market_overview",
             "value": f"沪深北 A股快照 {int(quote_count):,} 只",
             "status": "available",
             "reason": None,
-            "provenance": provenance(latest_stock["quote_time"], latest_stock["fetched_at"]),
+            "provenance": provenance([latest_stock["source_id"]], latest_stock["quote_time"], latest_stock["fetched_at"], latest_stock["license_status"]),
         })
     else:
         cards.append({"key": "dashboard.market_overview", "value": None,
                       "status": "unavailable", "reason": "data_not_synced", "provenance": None})
 
     if breadth:
-        prov = provenance(breadth["quote_time"], breadth["fetched_at"])
+        prov = provenance([breadth["source_id"]], breadth["quote_time"], breadth["fetched_at"], breadth["license_status"])
         cards.append({
             "key": "dashboard.market_breadth",
             "value": f"上涨 {breadth['up_count']} / 下跌 {breadth['down_count']} / 平盘 {breadth['flat_count']}",
@@ -331,3 +339,4 @@ def get_dashboard(conn: sqlite3.Connection) -> dict:
     if breadth:
         cards[6]["value"] += f"（{breadth['note']}）"
     return {"cards": cards, "time": fetched_at}
+

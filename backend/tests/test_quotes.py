@@ -1,4 +1,4 @@
-﻿from __future__ import annotations
+from __future__ import annotations
 
 import sqlite3
 from datetime import date
@@ -99,11 +99,37 @@ def test_sync_failure_marks_unavailable():
     def fail():
         raise RuntimeError("upstream down")
 
-    summary = sync_quotes(conn, fetch_indices_fn=fail, fetch_stocks_fn=fail)
+    summary = sync_quotes(
+        conn,
+        fetch_indices_fn=fail,
+        fetch_stocks_fn=fail,
+        fetch_indices_fallback_fn=fail,
+    )
     assert summary["errors"]
     dash = get_dashboard(conn)
     cards = {c["key"]: c for c in dash["cards"]}
     assert cards["dashboard.sse_index"]["status"] == "unavailable"
     row = conn.execute("SELECT status FROM data_availability WHERE data_key='dashboard.sse_index'").fetchone()
     assert row["status"] == "UNAVAILABLE"
+
+
+def test_tencent_fallback_used_when_eastmoney_fails():
+    conn = make_db()
+
+    def fail():
+        raise RuntimeError("eastmoney down")
+
+    summary = sync_quotes(
+        conn,
+        fetch_indices_fn=fail,
+        fetch_stocks_fn=lambda: [],
+        fetch_indices_fallback_fn=lambda: parse_index_rows(INDEX_ROWS),
+    )
+    assert summary["indices"] == 5
+    assert any("fallback" in e for e in summary["errors"])
+    row = conn.execute("SELECT source_id, is_realtime FROM index_quotes LIMIT 1").fetchone()
+    assert row["is_realtime"] == 0
+    dash = get_dashboard(conn)
+    cards = {c["key"]: c for c in dash["cards"]}
+    assert cards["dashboard.sse_index"]["status"] == "available"
 

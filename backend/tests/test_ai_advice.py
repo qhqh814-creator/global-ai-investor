@@ -158,3 +158,16 @@ def test_detail_and_no_fake_prices_without_quote():
     detail = get_recommendation(conn, item["id"])
     assert detail and detail["reasons"]
 
+
+def test_announcement_links_only_its_own_sec_code():
+    conn = make_db()
+    cur = conn.execute(
+        "INSERT INTO announcements(announcement_id, sec_code, sec_name, title, published_at, url, source_id, fetched_at) "
+        "VALUES ('A2', '600000', '浦发银行', '关于为平安银行股份有限公司提供担保的核查意见', ?, 'https://example.com/a2', 'cninfo_announcement', ?)",
+        (NOW, NOW),
+    )
+    conn.commit()
+    sync_stock_links(conn)
+    links = conn.execute("SELECT code FROM news_stock_links WHERE target_type='announcement' AND target_id=?", (cur.lastrowid,)).fetchall()
+    codes = {r["code"] for r in links}
+    assert codes == {"600000"}  # 平安银行 is only an intermediary mention, not the issuer

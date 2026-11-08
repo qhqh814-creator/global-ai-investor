@@ -5,6 +5,7 @@ import { writeFileSync } from 'node:fs';
 const out = process.argv[2] ?? 'data/logs/dashboard.png';
 const base = process.argv[3] ?? 'http://127.0.0.1:9222';
 const hash = process.argv[4] ?? '';
+const scrollY = Number(process.argv[5] ?? 0);
 
 const targets = await (await fetch(`${base}/json`)).json();
 const page = targets.find((t) => t.type === 'page');
@@ -39,7 +40,13 @@ if (hash) {
   await new Promise((r) => setTimeout(r, 2000));
 }
 
+if (scrollY) {
+  await send('Runtime.evaluate', { expression: `window.scrollTo(0, ${scrollY})` });
+  await new Promise((r) => setTimeout(r, 800));
+}
+
 const result = await send('Page.captureScreenshot', { format: 'png' });
 writeFileSync(out, Buffer.from(result.data, 'base64'));
 console.log(`saved ${out}`);
 ws.close();
+

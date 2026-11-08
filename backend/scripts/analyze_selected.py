@@ -27,16 +27,24 @@ def main():
     args = sys.argv[1:]
     if not args:
         raise SystemExit("usage: analyze_selected.py <id:type> ... <model>")
-    model = args[-1]; pairs = args[:-1]
-    client = make_client("ollama", model)
+    provider, model = "ollama", "qwen3:8b"
+    pairs = list(args)
+    if pairs and pairs[-1].startswith("deepseek:"):
+        provider, model = "deepseek", pairs.pop().split(":", 1)[1]
+    elif pairs and pairs[-1].startswith("ollama:"):
+        provider, model = "ollama", pairs.pop().split(":", 1)[1]
+    elif pairs:
+        model = pairs.pop()
+    client = make_client(provider, model)
     with get_db() as conn:
         migrate(conn)
         selected = []
         for pair in pairs:
             tid, ttype = pair.split(":")
             selected.append(target(conn, ttype, int(tid)))
-        print("model", model, "targets", len(selected))
-        print(analyze_selected(conn, client, selected, model_id=f"ollama:{model}"))
+        print("provider", provider, "model", model, "targets", len(selected))
+        print(analyze_selected(conn, client, selected, model_id=f"{provider}:{model}"))
 
 if __name__ == "__main__":
     main()
+

@@ -92,3 +92,4 @@ F:\GlobalAIInvestor
 - DeepSeek Key 通过“设置 → AI 服务”输入，DPAPI 加密保存在本机；当前提供的 Key 测试为 401 无效，暂用 Ollama qwen3:8b。
 - 实测：4 只买入候选（600959/603610/300243/600362），持仓建议 002036 REDUCE、600000 HOLD。
 - 详见 [docs/11-第二轮AI买卖建议-v0.2.md](F:\GlobalAIInvestor\docs\11-第二轮AI买卖建议-v0.2.md)。
+

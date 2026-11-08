@@ -1,4 +1,4 @@
-"""Link news/announcements to listed companies (P3/P4).
+﻿"""Link news/announcements to listed companies (P3/P4).
 
 Deterministic matching only: stock code mentioned in text, company short name
 contained in text, or announcement's own sec_code. No LLM guessing; AI-provided
@@ -49,8 +49,13 @@ def extract_links(conn: sqlite3.Connection, text: str, sec_code: str | None = No
 
 
 def sync_stock_links(conn: sqlite3.Connection) -> dict:
+    """Rebuild derived links. Announcements link ONLY their own sec_code (the
+    issuer); names of intermediaries (brokers/lawyers) must not become subjects."""
     ts = now_iso()
     inserted = 0
+    by_code, _ = _securities_index(conn)
+    with conn:
+        conn.execute("DELETE FROM news_stock_links")
     news_rows = conn.execute("SELECT id, title, summary FROM news_items").fetchall()
     for row in news_rows:
         text = f"{row['title']} {row['summary'] or ''}"
@@ -61,13 +66,14 @@ def sync_stock_links(conn: sqlite3.Connection) -> dict:
                 (row["id"], code, match, conf, ts),
             )
             inserted += cur.rowcount
-    ann_rows = conn.execute("SELECT id, sec_code, title FROM announcements").fetchall()
+    ann_rows = conn.execute("SELECT id, sec_code FROM announcements").fetchall()
     for row in ann_rows:
-        for code, match, conf in extract_links(conn, row["title"] or "", row["sec_code"]):
+        code = row["sec_code"]
+        if code and code in by_code:
             cur = conn.execute(
                 "INSERT OR IGNORE INTO news_stock_links(target_type, target_id, code, match_type, confidence, created_at) "
-                "VALUES ('announcement', ?, ?, ?, ?, ?)",
-                (row["id"], code, match, conf, ts),
+                "VALUES ('announcement', ?, ?, 'announcement_code', 1.0, ?)",
+                (row["id"], code, ts),
             )
             inserted += cur.rowcount
     return {"inserted": inserted}
@@ -79,3 +85,4 @@ def links_for_analysis(conn: sqlite3.Connection, target_type: str, target_id: in
         (target_type, target_id),
     ).fetchall()
     return [dict(r) for r in rows]
+

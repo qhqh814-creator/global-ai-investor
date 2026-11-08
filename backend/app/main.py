@@ -1,4 +1,4 @@
-﻿"""Global AI Investor V1.0 backend (FastAPI sidecar).
+"""Global AI Investor V1.0 backend (FastAPI sidecar).
 
 P1: rule library, trading calendar, fee/order validation endpoints.
 Data collection and AI modules land in P2/P3.
@@ -14,6 +14,7 @@ from datetime import date, datetime, timezone
 from pathlib import Path
 
 from fastapi import Depends, FastAPI, HTTPException, Query, Request
+from pydantic import BaseModel
 from fastapi.responses import JSONResponse
 
 from .datasources.securities_lists import fetch_bse, fetch_sse, fetch_szse
@@ -30,6 +31,9 @@ from .ai import (
 )
 from .content import list_announcements, list_news, sync_announcements, sync_news
 from .quotes import get_dashboard, sync_quotes
+from .screening import latest_run, run_screening
+from .signals import ensure_default_rules, list_signals, run_signals
+from .watchlist import add_item, ensure_default_watchlist, list_items, list_watchlists, remove_item
 from .workers import run_job_now, start_scheduler, stop_scheduler
 from .rules import get_library
 from .rules.store import list_versions as db_rule_versions, stats as db_rule_stats, sync_library
@@ -65,6 +69,8 @@ def bootstrap() -> None:
         migrate(conn)
         sync_library(conn)
         ensure_alert_rules(conn)
+        ensure_default_watchlist(conn)
+        ensure_default_rules(conn)
         conn.execute(
             "INSERT OR REPLACE INTO app_settings(key, value_json, updated_at) VALUES (?, ?, ?)",
             ("app.last_start", json.dumps({"started_at": now_iso()}), now_iso()),
@@ -354,7 +360,73 @@ def api_scheduler_trigger(name: str) -> dict:
     return {"ok": True, "job": name}
 
 
+class WatchlistItemIn(BaseModel):
+    code: str
+    note: str | None = None
+
+
+class ScreeningIn(BaseModel):
+    filters: dict = {}
+
+
+@app.get("/api/watchlist", dependencies=[Depends(require_token)])
+def api_watchlist() -> dict:
+    with get_db() as conn:
+        ensure_default_watchlist(conn)
+        lists = list_watchlists(conn)
+        default = lists[0] if lists else None
+        items = list_items(conn, default["id"]) if default else []
+    return {"watchlists": lists, "items": items}
+
+
+@app.post("/api/watchlist/items", dependencies=[Depends(require_token)])
+def api_watchlist_add(payload: WatchlistItemIn) -> dict:
+    with get_db() as conn:
+        wid = ensure_default_watchlist(conn)
+        try:
+            added = add_item(conn, wid, payload.code, payload.note)
+        except ValueError as exc:
+            raise HTTPException(status_code=422, detail=str(exc)) from exc
+    return {"ok": True, "added": added, "code": payload.code}
+
+
+@app.delete("/api/watchlist/items/{code}", dependencies=[Depends(require_token)])
+def api_watchlist_remove(code: str) -> dict:
+    with get_db() as conn:
+        wid = ensure_default_watchlist(conn)
+        removed = remove_item(conn, wid, code)
+    if not removed:
+        raise HTTPException(status_code=404, detail="not in watchlist")
+    return {"ok": True, "code": code}
+
+
+@app.get("/api/signals", dependencies=[Depends(require_token)])
+def api_signals(limit: int = 50) -> dict:
+    with get_db() as conn:
+        return {"items": list_signals(conn, limit=limit)}
+
+
+@app.post("/api/signals/run", dependencies=[Depends(require_token)])
+def api_signals_run() -> dict:
+    with get_db() as conn:
+        return run_signals(conn)
+
+
+@app.post("/api/screening/run", dependencies=[Depends(require_token)])
+def api_screening_run(payload: ScreeningIn | None = None) -> dict:
+    with get_db() as conn:
+        return run_screening(conn, filters=(payload.filters if payload else None))
+
+
+@app.get("/api/screening/latest", dependencies=[Depends(require_token)])
+def api_screening_latest() -> dict:
+    with get_db() as conn:
+        result = latest_run(conn)
+    return result or {"run": None, "items": []}
+
+
 @app.exception_handler(Exception)
 async def unhandled(_request: Request, exc: Exception) -> JSONResponse:
     return JSONResponse(status_code=500, content={"ok": False, "error": str(exc)})
+
 

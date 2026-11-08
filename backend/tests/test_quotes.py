@@ -70,8 +70,27 @@ def test_dashboard_without_data_all_unavailable():
     conn = make_db()
     dash = get_dashboard(conn)
     assert len(dash["cards"]) == 15
-    assert all(c["status"] == "unavailable" for c in dash["cards"])
-    assert all(c["value"] is None for c in dash["cards"])
+    cards = {c["key"]: c for c in dash["cards"]}
+    for key in [
+        "dashboard.sse_index",
+        "dashboard.szse_index",
+        "dashboard.chinext_index",
+        "dashboard.star50",
+        "dashboard.bse50",
+        "dashboard.market_overview",
+        "dashboard.market_breadth",
+        "dashboard.limit_counts",
+        "dashboard.turnover",
+        "dashboard.good_news",
+        "dashboard.ai_opportunities",
+        "dashboard.paper_account",
+    ]:
+        assert cards[key]["status"] == "unavailable", key
+        assert cards[key]["value"] is None, key
+    # Local modules are connected; zero is real data (not fabricated).
+    assert cards["dashboard.risk_alerts"]["status"] == "available"
+    assert cards["dashboard.watchlist"]["status"] == "available"
+    assert cards["dashboard.signals"]["status"] == "available"
 
 
 def test_sync_and_dashboard_with_fake_sources():

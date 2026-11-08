@@ -5,7 +5,11 @@
             },
     "nav":  {
                 "dashboard":  "Dashboard",
-                "settings":  "Settings"
+                "settings":  "Settings",
+                "news":  "News",
+                "alerts":  "Alerts",
+                "watchlist":  "Watchlist",
+                "signals":  "Signals"
             },
     "dashboard":  {
                       "title":  "Market Dashboard",
@@ -51,7 +55,8 @@
                        "eod":  "Last trading day close",
                        "licensed":  "Licensed real-time",
                        "source":  "Source",
-                       "time":  "Data time"
+                       "time":  "Data time",
+                       "local":  "Computed locally"
                    },
     "settings":  {
                      "title":  "Settings",
@@ -62,5 +67,35 @@
                      "about":  "About",
                      "disclaimer":  "Data is for reference only and does not constitute investment advice. Third-party quotes are unlicensed snapshots, not real-time data.",
                      "version":  "Version"
-                 }
+                 },
+    "news":  {
+                 "title":  "News \u0026 Announcements",
+                 "subtitle":  "Real collection: titles/links/≤100-char summaries only; announcements metadata + original links",
+                 "announcements":  "Latest Announcements",
+                 "news":  "Financial News",
+                 "empty":  "No data"
+             },
+    "alerts":  {
+                   "title":  "Alert Center",
+                   "subtitle":  "Only AI-analyzed alerts with quoted evidence",
+                   "empty":  "No alerts",
+                   "ack":  "Acknowledge"
+               },
+    "watchlist":  {
+                      "title":  "Watchlist",
+                      "subtitle":  "Tracked securities with latest snapshot",
+                      "placeholder":  "6-digit code",
+                      "add":  "Add",
+                      "remove":  "Remove",
+                      "empty":  "Watchlist is empty",
+                      "added":  "Added",
+                      "exists":  "Already in watchlist",
+                      "failed":  "Add failed (unknown or invalid code)"
+                  },
+    "signals":  {
+                    "title":  "Signals",
+                    "subtitle":  "Computed from the latest quote snapshot and rule library",
+                    "run":  "Run signals",
+                    "empty":  "No signals"
+                }
 }

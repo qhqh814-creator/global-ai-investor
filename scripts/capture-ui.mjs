@@ -1,9 +1,10 @@
 // Dev utility: capture the running Electron renderer via CDP.
-// Usage: node scripts/capture-ui.mjs <output.png> [http://127.0.0.1:9222]
+// Usage: node scripts/capture-ui.mjs <output.png> [http://127.0.0.1:9222] [#/route]
 import { writeFileSync } from 'node:fs';
 
 const out = process.argv[2] ?? 'data/logs/dashboard.png';
 const base = process.argv[3] ?? 'http://127.0.0.1:9222';
+const hash = process.argv[4] ?? '';
 
 const targets = await (await fetch(`${base}/json`)).json();
 const page = targets.find((t) => t.type === 'page');
@@ -15,16 +16,30 @@ await new Promise((res, rej) => {
   ws.onerror = rej;
 });
 
-const result = await new Promise((resolve, reject) => {
-  const id = 1;
-  ws.onmessage = (ev) => {
-    const msg = JSON.parse(String(ev.data));
-    if (msg.id === id) resolve(msg.result);
-  };
-  ws.send(JSON.stringify({ id, method: 'Page.captureScreenshot', params: { format: 'png' } }));
-  setTimeout(() => reject(new Error('capture timeout')), 10000);
-});
+let nextId = 1;
+function send(method, params = {}) {
+  return new Promise((resolve, reject) => {
+    const id = nextId++;
+    const timer = setTimeout(() => reject(new Error(`${method} timeout`)), 15000);
+    const handler = (ev) => {
+      const msg = JSON.parse(String(ev.data));
+      if (msg.id === id) {
+        clearTimeout(timer);
+        ws.removeEventListener('message', handler);
+        resolve(msg.result);
+      }
+    };
+    ws.addEventListener('message', handler);
+    ws.send(JSON.stringify({ id, method, params }));
+  });
+}
 
+if (hash) {
+  await send('Runtime.evaluate', { expression: `location.hash = '${hash}'` });
+  await new Promise((r) => setTimeout(r, 2000));
+}
+
+const result = await send('Page.captureScreenshot', { format: 'png' });
 writeFileSync(out, Buffer.from(result.data, 'base64'));
 console.log(`saved ${out}`);
 ws.close();

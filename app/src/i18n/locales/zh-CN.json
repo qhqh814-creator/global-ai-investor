@@ -5,7 +5,11 @@
             },
     "nav":  {
                 "dashboard":  "驾驶舱",
-                "settings":  "设置"
+                "settings":  "设置",
+                "news":  "新闻公告",
+                "alerts":  "警报中心",
+                "watchlist":  "观察池",
+                "signals":  "买卖信号"
             },
     "dashboard":  {
                       "title":  "市场驾驶舱",
@@ -51,7 +55,8 @@
                        "eod":  "最近交易日收盘",
                        "licensed":  "授权实时",
                        "source":  "来源",
-                       "time":  "数据时间"
+                       "time":  "数据时间",
+                       "local":  "本地计算"
                    },
     "settings":  {
                      "title":  "设置",
@@ -62,5 +67,35 @@
                      "about":  "关于",
                      "disclaimer":  "数据仅供参考，不构成投资建议。第三方行情为未授权快照，非实时数据。",
                      "version":  "版本"
-                 }
+                 },
+    "news":  {
+                 "title":  "新闻与公告",
+                 "subtitle":  "真实采集，仅标题/链接/≤100字摘要；公告仅存元数据与原始链接",
+                 "announcements":  "最新公告",
+                 "news":  "财经新闻",
+                 "empty":  "暂无数据"
+             },
+    "alerts":  {
+                   "title":  "警报中心",
+                   "subtitle":  "仅显示经 AI 分析且有原文证据的警报",
+                   "empty":  "暂无警报",
+                   "ack":  "确认"
+               },
+    "watchlist":  {
+                      "title":  "股票观察池",
+                      "subtitle":  "关注标的与最新快照",
+                      "placeholder":  "输入6位代码",
+                      "add":  "添加",
+                      "remove":  "移除",
+                      "empty":  "观察池为空",
+                      "added":  "已添加",
+                      "exists":  "已在观察池",
+                      "failed":  "添加失败（代码不存在或格式错误）"
+                  },
+    "signals":  {
+                    "title":  "买卖信号",
+                    "subtitle":  "基于最新行情快照与规则库计算",
+                    "run":  "运行信号",
+                    "empty":  "暂无信号"
+                }
 }

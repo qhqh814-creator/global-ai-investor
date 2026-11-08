@@ -326,15 +326,51 @@ def get_dashboard(conn: sqlite3.Connection) -> dict:
             cards.append({"key": key, "value": None, "status": "unavailable",
                           "reason": "data_not_synced", "provenance": None})
 
-    for key, reason in [
-        ("dashboard.good_news", "p3_not_connected"),
-        ("dashboard.risk_alerts", "p3_not_connected"),
-        ("dashboard.ai_opportunities", "p3_not_connected"),
-        ("dashboard.watchlist", "p4_not_connected"),
-        ("dashboard.signals", "p4_not_connected"),
-        ("dashboard.paper_account", "p5_not_connected"),
-    ]:
-        cards.append({"key": key, "value": None, "status": "unavailable", "reason": reason, "provenance": None})
+    local_prov = {
+        "sourceIds": ["local_engine"],
+        "quoteTime": None,
+        "fetchedAt": fetched_at,
+        "isRealtime": False,
+        "kind": "snapshot_unknown",
+        "licenseStatus": "unknown",
+        "commercialOk": True,
+    }
+
+    def local_card(key: str, value: str | None, reason: str | None = None) -> dict:
+        if value is None:
+            return {"key": key, "value": None, "status": "unavailable", "reason": reason, "provenance": None}
+        return {"key": key, "value": value, "status": "available", "reason": None, "provenance": local_prov}
+
+    since = (datetime.now(TZ) - timedelta(days=7)).isoformat(timespec="seconds")
+    good_news = conn.execute(
+        "SELECT COUNT(*) AS n FROM ai_analysis WHERE sentiment='positive' AND materiality IN ('L2','L3','L4') AND created_at >= ?",
+        (since,),
+    ).fetchone()["n"]
+    cards.append(local_card("dashboard.good_news", f"利好消息 {int(good_news)} 条（AI分析）" if good_news else None,
+                            "no_positive_analysis"))
+
+    open_alerts = conn.execute(
+        "SELECT COUNT(*) AS n FROM alerts WHERE status='OPEN' AND level IN ('L2','L3','L4')"
+    ).fetchone()["n"]
+    cards.append(local_card("dashboard.risk_alerts", f"未处理警报 {int(open_alerts)} 条（L2+）"))
+
+    last_run = conn.execute("SELECT result_count FROM screening_runs ORDER BY id DESC LIMIT 1").fetchone()
+    if last_run:
+        cards.append(local_card("dashboard.ai_opportunities", f"AI初筛候选 {int(last_run['result_count'])} 只"))
+    else:
+        cards.append(local_card("dashboard.ai_opportunities", None, "no_screening_run"))
+
+    watch_count = conn.execute("SELECT COUNT(*) AS n FROM watchlist_items").fetchone()["n"]
+    cards.append(local_card("dashboard.watchlist", f"观察池 {int(watch_count)} 只" if watch_count else "观察池为空"))
+
+    latest_trade = conn.execute("SELECT trade_date FROM market_breadth ORDER BY fetched_at DESC LIMIT 1").fetchone()
+    signal_date = latest_trade["trade_date"] if latest_trade else datetime.now(TZ).date().isoformat()
+    signal_count = conn.execute("SELECT COUNT(*) AS n FROM signals WHERE trade_date = ?", (signal_date,)).fetchone()["n"]
+    cards.append(local_card("dashboard.signals", f"{signal_date} 信号 {int(signal_count)} 条" if signal_count else "今日暂无信号"))
+
+    cards.append({"key": "dashboard.paper_account", "value": None, "status": "unavailable",
+                  "reason": "p5_not_connected", "provenance": None})
+    return {"cards": cards, "time": fetched_at}
 
     if breadth:
         cards[6]["value"] += f"（{breadth['note']}）"

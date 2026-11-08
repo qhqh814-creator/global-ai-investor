@@ -1,4 +1,4 @@
-import { useTranslation } from 'react-i18next';
+﻿import { useTranslation } from 'react-i18next';
 import type { Provenance } from '../api/client';
 
 interface Props {
@@ -12,6 +12,7 @@ interface Props {
 export default function DataCard({ title, value, provenance, status = 'unavailable', reason }: Props) {
   const { t } = useTranslation();
   const isAvailable = status === 'available' && value != null;
+  const isLocal = provenance?.sourceIds?.includes('local_engine') ?? false;
 
   return (
     <section className={isAvailable ? 'card available' : 'card unavailable'}>
@@ -21,7 +22,7 @@ export default function DataCard({ title, value, provenance, status = 'unavailab
         <>
           <div className="card-value">{value}</div>
           <div className="card-meta">
-            <span className="badge">{provenance?.isRealtime ? t('provenance.licensed') : t('provenance.thirdParty')}</span>
+            <span className="badge">{isLocal ? t('provenance.local') : provenance?.isRealtime ? t('provenance.licensed') : t('provenance.thirdParty')}</span>
             {provenance?.quoteTime && (
               <span className="meta">
                 {t('provenance.time')}: {provenance.quoteTime}
@@ -44,3 +45,4 @@ export default function DataCard({ title, value, provenance, status = 'unavailab
     </section>
   );
 }
+

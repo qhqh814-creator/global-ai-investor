@@ -63,3 +63,37 @@ export async function apiGetRaw<T>(path: string): Promise<T | null> {
   if (!res || !res.ok) return null;
   return (await res.json()) as T;
 }
+
+export async function apiPost<T = unknown>(path: string, body?: unknown): Promise<T | null> {
+  const backend = await getBackend();
+  if (!backend) return null;
+  try {
+    const res = await fetch(`${backend.baseUrl}${path}`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${backend.token}`,
+        'Content-Type': 'application/json'
+      },
+      body: body === undefined ? undefined : JSON.stringify(body)
+    });
+    if (!res.ok) return null;
+    return (await res.json()) as T;
+  } catch {
+    return null;
+  }
+}
+
+export async function apiDelete<T = unknown>(path: string): Promise<T | null> {
+  const backend = await getBackend();
+  if (!backend) return null;
+  try {
+    const res = await fetch(`${backend.baseUrl}${path}`, {
+      method: 'DELETE',
+      headers: { Authorization: `Bearer ${backend.token}` }
+    });
+    if (!res.ok) return null;
+    return (await res.json()) as T;
+  } catch {
+    return null;
+  }
+}

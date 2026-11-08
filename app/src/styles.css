@@ -219,3 +219,85 @@ h2 {
   border-top: 1px solid var(--border);
   padding-top: 10px;
 }
+
+.two-col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.list-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 10px 12px;
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+}
+
+.list-main {
+  flex: 1;
+  min-width: 0;
+}
+
+.list-title {
+  font-size: 14px;
+  margin-bottom: 3px;
+}
+
+.list-row a {
+  color: var(--text);
+  text-decoration: none;
+  font-size: 13px;
+}
+
+.list-row a:hover {
+  color: var(--accent);
+}
+
+.quote {
+  font-style: italic;
+  border-left: 2px solid var(--border);
+  padding-left: 8px;
+}
+
+.level-badge {
+  min-width: 34px;
+  text-align: center;
+  font-size: 11px;
+  font-weight: 700;
+  border-radius: 6px;
+  padding: 4px 6px;
+  background: var(--bg3);
+  color: var(--warn);
+}
+
+.level-badge.buy {
+  color: var(--ok);
+}
+
+.level-badge.sell {
+  color: #ef6b6b;
+}
+
+.input {
+  background: var(--bg3);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 7px 10px;
+  font-size: 13px;
+  width: 160px;
+}
+
+button.chip:disabled {
+  opacity: 0.5;
+  cursor: default;
+}

@@ -1,10 +1,18 @@
 import { useTranslation } from 'react-i18next';
 import { Link, Route, Routes, useLocation } from 'react-router-dom';
 import Dashboard from './modules/dashboard/Dashboard';
+import News from './modules/news/News';
+import Alerts from './modules/alerts/Alerts';
+import Watchlist from './modules/watchlist/Watchlist';
+import Signals from './modules/signals/Signals';
 import Settings from './modules/settings/Settings';
 
 const NAV = [
   { to: '/', key: 'nav.dashboard' },
+  { to: '/news', key: 'nav.news' },
+  { to: '/alerts', key: 'nav.alerts' },
+  { to: '/watchlist', key: 'nav.watchlist' },
+  { to: '/signals', key: 'nav.signals' },
   { to: '/settings', key: 'nav.settings' }
 ];
 
@@ -34,6 +42,10 @@ export default function App() {
       <main className="content">
         <Routes>
           <Route path="/" element={<Dashboard />} />
+          <Route path="/news" element={<News />} />
+          <Route path="/alerts" element={<Alerts />} />
+          <Route path="/watchlist" element={<Watchlist />} />
+          <Route path="/signals" element={<Signals />} />
           <Route path="/settings" element={<Settings />} />
         </Routes>
       </main>

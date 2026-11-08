@@ -29,7 +29,11 @@ from .ai import (
     list_analysis,
     make_client,
 )
+from .backtest import get_backtest, run_backtest
 from .content import list_announcements, list_news, sync_announcements, sync_news
+from .klines import sync_daily
+from .paper import get_account, list_orders as paper_orders, list_trades as paper_trades, place_order, reset_account
+from .predictions import accuracy, create_prediction, list_predictions, settle_predictions
 from .quotes import get_dashboard, sync_quotes
 from .screening import latest_run, run_screening
 from .signals import ensure_default_rules, list_signals, run_signals
@@ -425,8 +429,139 @@ def api_screening_latest() -> dict:
     return result or {"run": None, "items": []}
 
 
+class KlineSyncIn(BaseModel):
+    codes: list[str]
+    start: str
+    end: str
+
+
+class BacktestIn(BaseModel):
+    codes: list[str]
+    start_date: str
+    end_date: str
+    initial_cash: float = 1_000_000.0
+    entry_pct: float = 5.0
+    hold_days: int = 3
+    max_positions: int = 5
+
+
+class PaperOrderIn(BaseModel):
+    code: str
+    side: str
+    qty: int
+    order_type: str = "MARKET"
+    price: float | None = None
+
+
+class PredictionIn(BaseModel):
+    code: str
+    direction: str
+    horizon_days: int = 5
+    confidence: float | None = None
+    model_id: str | None = None
+
+
+@app.post("/api/klines/sync", dependencies=[Depends(require_token)])
+def api_klines_sync(payload: KlineSyncIn) -> dict:
+    with get_db() as conn:
+        pairs: list[tuple[str, str]] = []
+        missing: list[str] = []
+        for code in payload.codes:
+            row = conn.execute("SELECT exchange FROM securities WHERE code = ?", (code,)).fetchone()
+            if row:
+                pairs.append((code, row["exchange"]))
+            else:
+                missing.append(code)
+        if not pairs:
+            raise HTTPException(status_code=422, detail=f"securities not found: {missing}")
+        try:
+            result = sync_daily(conn, pairs, date.fromisoformat(payload.start), date.fromisoformat(payload.end))
+            result["missing"] = missing
+            return result
+        except ValueError as exc:
+            raise HTTPException(status_code=422, detail=str(exc)) from exc
+
+
+@app.post("/api/backtest/run", dependencies=[Depends(require_token)])
+def api_backtest_run(payload: BacktestIn) -> dict:
+    with get_db() as conn:
+        return run_backtest(
+            conn, payload.codes, payload.start_date, payload.end_date,
+            initial_cash=payload.initial_cash, entry_pct=payload.entry_pct,
+            hold_days=payload.hold_days, max_positions=payload.max_positions,
+        )
+
+
+@app.get("/api/backtest/{backtest_id}", dependencies=[Depends(require_token)])
+def api_backtest_get(backtest_id: int) -> dict:
+    with get_db() as conn:
+        result = get_backtest(conn, backtest_id)
+    if result is None:
+        raise HTTPException(status_code=404, detail="backtest not found")
+    return result
+
+
+@app.get("/api/paper/account", dependencies=[Depends(require_token)])
+def api_paper_account() -> dict:
+    with get_db() as conn:
+        return get_account(conn)
+
+
+@app.post("/api/paper/orders", dependencies=[Depends(require_token)])
+def api_paper_order(payload: PaperOrderIn) -> dict:
+    with get_db() as conn:
+        return place_order(conn, payload.code, payload.side, payload.qty, payload.order_type, payload.price)
+
+
+@app.get("/api/paper/orders", dependencies=[Depends(require_token)])
+def api_paper_orders(limit: int = 50) -> dict:
+    with get_db() as conn:
+        return {"items": paper_orders(conn, limit=limit)}
+
+
+@app.get("/api/paper/trades", dependencies=[Depends(require_token)])
+def api_paper_trades(limit: int = 50) -> dict:
+    with get_db() as conn:
+        return {"items": paper_trades(conn, limit=limit)}
+
+
+@app.post("/api/paper/reset", dependencies=[Depends(require_token)])
+def api_paper_reset() -> dict:
+    with get_db() as conn:
+        return reset_account(conn)
+
+
+@app.get("/api/predictions", dependencies=[Depends(require_token)])
+def api_predictions(limit: int = 50) -> dict:
+    with get_db() as conn:
+        return {"items": list_predictions(conn, limit=limit)}
+
+
+@app.post("/api/predictions", dependencies=[Depends(require_token)])
+def api_prediction_create(payload: PredictionIn) -> dict:
+    with get_db() as conn:
+        try:
+            return create_prediction(conn, payload.code, payload.direction, payload.horizon_days,
+                                     payload.confidence, payload.model_id)
+        except ValueError as exc:
+            raise HTTPException(status_code=422, detail=str(exc)) from exc
+
+
+@app.post("/api/predictions/settle", dependencies=[Depends(require_token)])
+def api_predictions_settle() -> dict:
+    with get_db() as conn:
+        return settle_predictions(conn)
+
+
+@app.get("/api/accuracy", dependencies=[Depends(require_token)])
+def api_accuracy() -> dict:
+    with get_db() as conn:
+        return accuracy(conn)
+
+
 @app.exception_handler(Exception)
 async def unhandled(_request: Request, exc: Exception) -> JSONResponse:
     return JSONResponse(status_code=500, content={"ok": False, "error": str(exc)})
+
 
 

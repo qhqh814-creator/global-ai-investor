@@ -14,6 +14,14 @@ export interface DataResult<T> {
   unavailableReason?: string;
 }
 
+export interface DashboardCard {
+  key: string;
+  value: string | null;
+  status: 'available' | 'unavailable';
+  reason: string | null;
+  provenance: Provenance | null;
+}
+
 let backendPromise: Promise<{ baseUrl: string; token: string } | null> | null = null;
 
 export async function getBackend(): Promise<{ baseUrl: string; token: string } | null> {
@@ -31,20 +39,27 @@ export async function getBackend(): Promise<{ baseUrl: string; token: string } |
   return backendPromise;
 }
 
-export async function apiGet<T>(path: string): Promise<DataResult<T>> {
+async function request(path: string): Promise<Response | null> {
   const backend = await getBackend();
-  if (!backend) {
-    return { value: null, provenance: null, unavailableReason: 'backend_unavailable' };
-  }
+  if (!backend) return null;
   try {
-    const res = await fetch(`${backend.baseUrl}${path}`, {
+    return await fetch(`${backend.baseUrl}${path}`, {
       headers: { Authorization: `Bearer ${backend.token}` }
     });
-    if (!res.ok) {
-      return { value: null, provenance: null, unavailableReason: `http_${res.status}` };
-    }
-    return (await res.json()) as DataResult<T>;
   } catch {
-    return { value: null, provenance: null, unavailableReason: 'network_error' };
+    return null;
   }
+}
+
+export async function apiGet<T>(path: string): Promise<DataResult<T>> {
+  const res = await request(path);
+  if (!res) return { value: null, provenance: null, unavailableReason: 'backend_unavailable' };
+  if (!res.ok) return { value: null, provenance: null, unavailableReason: `http_${res.status}` };
+  return (await res.json()) as DataResult<T>;
+}
+
+export async function apiGetRaw<T>(path: string): Promise<T | null> {
+  const res = await request(path);
+  if (!res || !res.ok) return null;
+  return (await res.json()) as T;
 }

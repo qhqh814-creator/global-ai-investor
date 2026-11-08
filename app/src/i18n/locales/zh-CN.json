@@ -1,58 +1,66 @@
-{
-  "app": {
-    "title": "Global AI Investor",
-    "subtitle": "A股智能研究终端"
-  },
-  "nav": {
-    "dashboard": "驾驶舱",
-    "settings": "设置"
-  },
-  "dashboard": {
-    "title": "市场驾驶舱",
-    "subtitle": "数据均标注来源与时间；无真实数据时显示“数据不可用”",
-    "backend": "本地服务",
-    "backendRunning": "运行中",
-    "backendFailed": "启动失败",
-    "cards": {
-      "sse_index": "上证指数",
-      "szse_index": "深证成指",
-      "chinext_index": "创业板指",
-      "star50": "科创50",
-      "bse50": "北证50",
-      "market_overview": "沪深北市场行情",
-      "breadth": "A股涨跌家数",
-      "limit_counts": "涨停/跌停家数",
-      "turnover": "成交额",
-      "good_news": "重大利好消息",
-      "risk_alerts": "重大风险警报",
-      "ai_opportunities": "AI投资机会",
-      "watchlist": "股票观察池",
-      "signals": "买卖信号",
-      "paper_account": "模拟账户资产"
-    }
-  },
-  "data": {
-    "loading": "数据加载中…",
-    "unavailable": "数据不可用",
-    "offline": "当前离线，展示本地历史数据",
-    "no_data": "尚未接入数据源（P2 阶段接入）",
-    "not_trading_day": "休市"
-  },
-  "provenance": {
-    "thirdParty": "第三方快照 · 非实时",
-    "eod": "最近交易日收盘",
-    "licensed": "授权实时",
-    "source": "来源",
-    "time": "数据时间"
-  },
-  "settings": {
-    "title": "设置",
-    "language": "语言",
-    "backup": "数据备份",
-    "backupHint": "备份目录：data\\backup（P0 阶段实现）",
-    "datasources": "数据源",
-    "about": "关于",
-    "disclaimer": "数据仅供参考，不构成投资建议。第三方行情为未授权快照，非实时数据。",
-    "version": "版本"
-  }
+﻿{
+    "app":  {
+                "title":  "Global AI Investor",
+                "subtitle":  "A股智能研究终端"
+            },
+    "nav":  {
+                "dashboard":  "驾驶舱",
+                "settings":  "设置"
+            },
+    "dashboard":  {
+                      "title":  "市场驾驶舱",
+                      "subtitle":  "数据均标注来源与时间；无真实数据时显示“数据不可用”",
+                      "backend":  "本地服务",
+                      "backendRunning":  "运行中",
+                      "backendFailed":  "启动失败",
+                      "cards":  {
+                                    "sse_index":  "上证指数",
+                                    "szse_index":  "深证成指",
+                                    "chinext_index":  "创业板指",
+                                    "star50":  "科创50",
+                                    "bse50":  "北证50",
+                                    "market_overview":  "沪深北市场行情",
+                                    "breadth":  "A股涨跌家数",
+                                    "limit_counts":  "涨停/跌停家数",
+                                    "turnover":  "成交额",
+                                    "good_news":  "重大利好消息",
+                                    "risk_alerts":  "重大风险警报",
+                                    "ai_opportunities":  "AI投资机会",
+                                    "watchlist":  "股票观察池",
+                                    "signals":  "买卖信号",
+                                    "paper_account":  "模拟账户资产"
+                                }
+                  },
+    "data":  {
+                 "loading":  "数据加载中…",
+                 "unavailable":  "数据不可用",
+                 "offline":  "当前离线，展示本地历史数据",
+                 "no_data":  "尚未接入数据源（P2 阶段接入）",
+                 "not_trading_day":  "休市",
+                 "reason":  {
+                                "data_not_synced":  "尚未同步数据",
+                                "p3_not_connected":  "AI 分析将在 P3 接入",
+                                "p4_not_connected":  "该模块将在 P4 接入",
+                                "p5_not_connected":  "模拟账户将在 P5 接入",
+                                "backend_unavailable":  "本地服务不可用",
+                                "network_error":  "网络错误"
+                            }
+             },
+    "provenance":  {
+                       "thirdParty":  "第三方快照 · 非实时",
+                       "eod":  "最近交易日收盘",
+                       "licensed":  "授权实时",
+                       "source":  "来源",
+                       "time":  "数据时间"
+                   },
+    "settings":  {
+                     "title":  "设置",
+                     "language":  "语言",
+                     "backup":  "数据备份",
+                     "backupHint":  "备份目录：data\\backup（P0 阶段实现）",
+                     "datasources":  "数据源",
+                     "about":  "关于",
+                     "disclaimer":  "数据仅供参考，不构成投资建议。第三方行情为未授权快照，非实时数据。",
+                     "version":  "版本"
+                 }
 }

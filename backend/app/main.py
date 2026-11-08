@@ -18,6 +18,7 @@ from fastapi.responses import JSONResponse
 
 from .datasources.securities_lists import fetch_bse, fetch_sse, fetch_szse
 from .db.migrate import migrate
+from .quotes import get_dashboard, sync_quotes
 from .rules import get_library
 from .rules.store import list_versions as db_rule_versions, stats as db_rule_stats, sync_library
 from .securities import list_securities, stats as securities_stats, upsert_securities
@@ -111,19 +112,19 @@ def status() -> dict:
 
 @app.get("/api/dashboard", dependencies=[Depends(require_token)])
 def dashboard() -> dict:
-    cards = [
-        "sse_index", "szse_index", "chinext_index", "star50", "bse50",
-        "market_overview", "breadth", "limit_counts", "turnover",
-        "good_news", "risk_alerts", "ai_opportunities",
-        "watchlist", "signals", "paper_account",
-    ]
-    return {
-        "cards": [
-            {"key": k, "value": None, "status": "unavailable", "reason": "data_source_not_connected", "provenance": None}
-            for k in cards
-        ],
-        "time": now_iso(),
-    }
+    with get_db() as conn:
+        return get_dashboard(conn)
+
+
+@app.post("/api/quotes/sync", dependencies=[Depends(require_token)])
+def quotes_sync() -> dict:
+    """Fetch index + full-market snapshots from the registered free source.
+
+    The response is a third-party snapshot (not real-time); every card that uses
+    it carries provenance. Failures degrade to '数据不可用' rather than fake data.
+    """
+    with get_db() as conn:
+        return sync_quotes(conn)
 
 
 @app.get("/api/rules/versions", dependencies=[Depends(require_token)])

@@ -1,58 +1,66 @@
-{
-  "app": {
-    "title": "Global AI Investor",
-    "subtitle": "A-share Intelligent Research Terminal"
-  },
-  "nav": {
-    "dashboard": "Dashboard",
-    "settings": "Settings"
-  },
-  "dashboard": {
-    "title": "Market Dashboard",
-    "subtitle": "Every metric shows its source and time; missing data shows “Data unavailable”",
-    "backend": "Local service",
-    "backendRunning": "Running",
-    "backendFailed": "Failed to start",
-    "cards": {
-      "sse_index": "SSE Composite",
-      "szse_index": "SZSE Component",
-      "chinext_index": "ChiNext Index",
-      "star50": "STAR 50",
-      "bse50": "BSE 50",
-      "market_overview": "SSE/SZSE/BSE Market",
-      "breadth": "A-share Advancers/Decliners",
-      "limit_counts": "Limit-up / Limit-down",
-      "turnover": "Turnover",
-      "good_news": "Major Positive News",
-      "risk_alerts": "Major Risk Alerts",
-      "ai_opportunities": "AI Opportunities",
-      "watchlist": "Watchlist",
-      "signals": "Buy/Sell Signals",
-      "paper_account": "Paper Account"
-    }
-  },
-  "data": {
-    "loading": "Loading data…",
-    "unavailable": "Data unavailable",
-    "offline": "Offline — showing local history",
-    "no_data": "Data source not connected yet (P2)",
-    "not_trading_day": "Market closed"
-  },
-  "provenance": {
-    "thirdParty": "Third-party snapshot · not real-time",
-    "eod": "Last trading day close",
-    "licensed": "Licensed real-time",
-    "source": "Source",
-    "time": "Data time"
-  },
-  "settings": {
-    "title": "Settings",
-    "language": "Language",
-    "backup": "Data backup",
-    "backupHint": "Backup directory: data\\backup (implemented in P0)",
-    "datasources": "Data sources",
-    "about": "About",
-    "disclaimer": "Data is for reference only and does not constitute investment advice. Third-party quotes are unlicensed snapshots, not real-time data.",
-    "version": "Version"
-  }
+﻿{
+    "app":  {
+                "title":  "Global AI Investor",
+                "subtitle":  "A-share Intelligent Research Terminal"
+            },
+    "nav":  {
+                "dashboard":  "Dashboard",
+                "settings":  "Settings"
+            },
+    "dashboard":  {
+                      "title":  "Market Dashboard",
+                      "subtitle":  "Every metric shows its source and time; missing data shows “Data unavailable”",
+                      "backend":  "Local service",
+                      "backendRunning":  "Running",
+                      "backendFailed":  "Failed to start",
+                      "cards":  {
+                                    "sse_index":  "SSE Composite",
+                                    "szse_index":  "SZSE Component",
+                                    "chinext_index":  "ChiNext Index",
+                                    "star50":  "STAR 50",
+                                    "bse50":  "BSE 50",
+                                    "market_overview":  "SSE/SZSE/BSE Market",
+                                    "breadth":  "A-share Advancers/Decliners",
+                                    "limit_counts":  "Limit-up / Limit-down",
+                                    "turnover":  "Turnover",
+                                    "good_news":  "Major Positive News",
+                                    "risk_alerts":  "Major Risk Alerts",
+                                    "ai_opportunities":  "AI Opportunities",
+                                    "watchlist":  "Watchlist",
+                                    "signals":  "Buy/Sell Signals",
+                                    "paper_account":  "Paper Account"
+                                }
+                  },
+    "data":  {
+                 "loading":  "Loading data…",
+                 "unavailable":  "Data unavailable",
+                 "offline":  "Offline — showing local history",
+                 "no_data":  "Data source not connected yet (P2)",
+                 "not_trading_day":  "Market closed",
+                 "reason":  {
+                                "data_not_synced":  "Data not synced yet",
+                                "p3_not_connected":  "AI analysis will be connected in P3",
+                                "p4_not_connected":  "This module will be connected in P4",
+                                "p5_not_connected":  "Paper account will be connected in P5",
+                                "backend_unavailable":  "Local service unavailable",
+                                "network_error":  "Network error"
+                            }
+             },
+    "provenance":  {
+                       "thirdParty":  "Third-party snapshot · not real-time",
+                       "eod":  "Last trading day close",
+                       "licensed":  "Licensed real-time",
+                       "source":  "Source",
+                       "time":  "Data time"
+                   },
+    "settings":  {
+                     "title":  "Settings",
+                     "language":  "Language",
+                     "backup":  "Data backup",
+                     "backupHint":  "Backup directory: data\\backup (implemented in P0)",
+                     "datasources":  "Data sources",
+                     "about":  "About",
+                     "disclaimer":  "Data is for reference only and does not constitute investment advice. Third-party quotes are unlicensed snapshots, not real-time data.",
+                     "version":  "Version"
+                 }
 }
